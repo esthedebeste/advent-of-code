@@ -2,6 +2,7 @@
 #include "transforms.h"
 #include <fstream>
 #include <iostream>
+#include <version>
 #if !defined(AOC_YEAR) || !defined(AOC_DAY)
 #error AOC_YEAR and AOC_DAY must be defined
 #endif
@@ -38,3 +39,11 @@ void day(Transform transform, Funcs... func) {
       ...);
   std::cout << "Done running day " AOC_DAY_STR "!\n";
 }
+
+#if __cpp_lib_unreachable >= 202202L
+#define unreachable() std::unreachable() // C++23
+#elif defined(__GNUC__)
+#define unreachable() __builtin_unreachable(); // GCC and Clang
+#elif defined(_MSC_VER)
+#define unreachable() __assume(false); // MSVC
+#endif

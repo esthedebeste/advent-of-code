@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.20)
 set(CMAKE_CXX_STANDARD 23)
 project(aoc-2022 CXX)
 
@@ -9,7 +9,7 @@ foreach(day RANGE 1 8)
     target_compile_definitions(2021-${day} PRIVATE AOC_YEAR=2021 AOC_DAY=${day})
 endforeach()
 
-foreach(day RANGE 1 1)
+foreach(day RANGE 1 2)
     add_executable(2022-${day} ${CMAKE_CURRENT_SOURCE_DIR}/days/2022/${day}.cpp)
     target_compile_definitions(2022-${day} PRIVATE AOC_DAY=${day} AOC_YEAR=2022)
 endforeach()
