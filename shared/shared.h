@@ -14,8 +14,7 @@
 
 using uint = unsigned int;
 
-template <InputTransform Transform, typename... Funcs>
-void day(Transform transform, Funcs... func) {
+void day(InputTransform auto transform, auto... func) {
   std::cout << "Running day " AOC_DAY_STR "..." << std::endl;
   int currPart = 0;
   std::string path = "../input/" AOC_YEAR_STR "/" AOC_DAY_STR ".txt";
