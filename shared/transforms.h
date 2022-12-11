@@ -1,4 +1,5 @@
 #pragma once
+#include "utils.h"
 #include <charconv>
 #include <fstream>
 #include <sstream>
@@ -7,9 +8,7 @@
 #include <vector>
 
 template <typename T>
-concept InputTransform = requires(T t, std::ifstream &s) {
-  t(s);
-};
+concept InputTransform = requires(T t, std::ifstream &s) { t(s); };
 
 auto noop = [](auto x) { return x; };
 auto full_file(auto transform) {
@@ -28,9 +27,7 @@ template <typename TR> auto split_by(char delim = '\n', TR transform = noop) {
       std::vector<R> result;
       do {
         result.push_back(transform(file));
-        if (file.peek() != delim)
-          break;
-        file.ignore(1);
+        file >> skip_until(delim);
       } while (!file.eof());
       return result;
     };
