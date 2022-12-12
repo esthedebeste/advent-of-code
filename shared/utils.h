@@ -19,3 +19,10 @@ std::istream &operator>>(std::istream &in, skip_until s) {
   in.ignore(std::numeric_limits<std::streamsize>::max(), s.c);
   return in;
 }
+
+#include <utility>
+template <typename T1, typename T2> struct std::hash<std::pair<T1, T2>> {
+  size_t operator()(const pair<T1, T2> &p) const {
+    return std::hash<T1>{}(p.first) ^ std::hash<T2>{}(p.second);
+  }
+};
