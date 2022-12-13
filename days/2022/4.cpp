@@ -7,7 +7,7 @@ int main() {
   using assignmentP = pair<assignment, assignment>;
   using input = vector<assignmentP> &;
   day(
-      lines(pair_transform(',', pair_transform('-', s_to_num<uint>))),
+      lines(pair_transform(',', pair_transform('-', parse<uint>))),
       [](input input) {
         uint64_t count = 0;
         for (auto [a, b] : input)

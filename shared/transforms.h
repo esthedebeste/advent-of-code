@@ -10,7 +10,7 @@
 template <typename T>
 concept InputTransform = requires(T t, std::ifstream &s) { t(s); };
 
-auto noop = [](auto x) { return x; };
+auto noop = [](std::string x) { return x; };
 auto full_file(auto transform) {
   return [=](std::ifstream &file) {
     std::stringstream buffer;
@@ -20,15 +20,25 @@ auto full_file(auto transform) {
 }
 auto full_file() { return full_file(noop); }
 template <class> inline constexpr bool fals = false;
+template <InputTransform TR, size_t Len>
+auto split_by(const char (&delim)[Len], TR transform) {
+  return [=](std::ifstream &file) {
+    using R = std::invoke_result_t<TR, std::ifstream &>;
+    std::vector<R> result;
+    do
+      result.push_back(transform(file));
+    while (file.peek() != EOF && file >> delim);
+    return result;
+  };
+}
 template <typename TR> auto split_by(char delim = '\n', TR transform = noop) {
   if constexpr (std::invocable<TR, std::ifstream &>)
     return [=](std::ifstream &file) {
       using R = std::invoke_result_t<TR, std::ifstream &>;
       std::vector<R> result;
-      do {
+      do
         result.push_back(transform(file));
-        file >> skip_until(delim);
-      } while (!file.eof());
+      while (file.peek() == delim && file.ignore(1));
       return result;
     };
   else if constexpr (std::invocable<TR, std::string &>)
@@ -57,16 +67,30 @@ template <typename TR> auto split_by(char delim = '\n', TR transform = noop) {
                             "or ifstream, got a TR");
 }
 auto split_by(char delim = '\n') { return split_by(delim, noop); }
-auto lines(auto transform) { return split_by('\n', transform); }
+template <InputTransform TR>
+auto split_to(char delim = '\n', TR transform = noop) {
+  return [=](std::ifstream &file) {
+    using R = std::invoke_result_t<TR, std::ifstream &>;
+    std::vector<R> result;
+    do {
+      result.push_back(transform(file));
+      file >> skip_until(delim);
+    } while (!file.eof());
+    return result;
+  };
+}
+auto split_to(auto delim, auto transform) { return split_by(delim, transform); }
+auto lines(auto transform) { return split_to('\n', transform); }
 auto lines() { return lines(noop); }
-auto pair_transform(char delim, auto transform) {
-  return [=](auto &x) {
-    auto splitter = split_by(delim, transform);
-    auto parts = splitter(x);
-    if (parts.size() != 2)
-      throw std::runtime_error("pair transform expected 2 parts, got " +
-                               std::to_string(parts.size()));
-    return std::make_pair(parts[0], parts[1]);
+auto pair_transform(char delim, InputTransform auto transform) {
+  return [=](std::ifstream &x) {
+    auto a = transform(x);
+    if (x.peek() != delim)
+      throw std::runtime_error("pair transform expected delim, got " +
+                               std::to_string(x.peek()));
+    x.ignore(1);
+    auto b = transform(x);
+    return std::make_pair(a, b);
   };
 }
 
@@ -80,8 +104,8 @@ auto parse_num(std::string_view str, int base = 10) {
 template <typename T = int> auto to_num(int base = 10) {
   return [=](std::string_view str) { return parse_num<T>(str, base); };
 }
-template <typename T = int> auto s_to_num(std::ifstream &input) {
-  T number;
-  input >> number;
-  return number;
+template <typename T = int> auto parse(std::ifstream &input) {
+  T parsed{};
+  input >> parsed;
+  return parsed;
 }
