@@ -27,7 +27,7 @@ auto split_by(const char (&delim)[Len], TR transform) {
     std::vector<R> result;
     do
       result.push_back(transform(file));
-    while (file.peek() != EOF && file >> delim);
+    while (file.peek() != EOF && file.peek() == delim[0] && file >> delim);
     return result;
   };
 }
