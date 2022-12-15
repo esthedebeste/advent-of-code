@@ -6,16 +6,15 @@
 using namespace std;
 
 using field = vector<string>;
-using pos = pair<int, int>;
 pos dirs[4]{pos{1, 0}, pos{-1, 0}, pos{0, 1}, pos{0, -1}};
 
 vector<pos> neighbors(field &grid, pos from) {
   vector<pos> results;
   for (pos dir : dirs) {
-    pos next{from.first + dir.first, from.second + dir.second};
-    if (next.first > 0 && next.first < grid.size() && next.second > 0 &&
-        next.second < grid[0].size() &&
-        grid[next.first][next.second] - 1 <= grid[from.first][from.second])
+    pos next{from.x + dir.x, from.y + dir.y};
+    if (next.x > 0 && next.x < grid.size() && next.y > 0 &&
+        next.y < grid[0].size() &&
+        grid[next.x][next.y] - 1 <= grid[from.x][from.y])
       results.push_back(next);
   }
   return results;

@@ -3,20 +3,6 @@
 
 using namespace std;
 
-struct pos {
-  int x, y;
-  pos down() const { return {x, y + 1}; }
-  pos left() const { return {x - 1, y}; }
-  pos right() const { return {x + 1, y}; }
-  friend bool operator==(pos a, pos b) { return a.x == b.x && a.y == b.y; }
-};
-namespace std {
-template <> struct hash<pos> {
-  size_t operator()(const pos &x) const {
-    return hash<int>()(x.x) ^ hash<int>()(x.y);
-  }
-};
-}
 using input = unordered_set<pos>;
 constexpr pos drop_pos{500, 0};
 
