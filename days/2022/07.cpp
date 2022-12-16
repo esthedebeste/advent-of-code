@@ -3,7 +3,7 @@
 
 using namespace std;
 
-string parse_cd(ifstream &input) {
+string parse_cd(istream &input) {
   input.ignore("$ cd "s.length());
   string name;
   getline(input, name);
@@ -14,7 +14,7 @@ struct Directory {
   uint size;
 
   static Directory empty() { return {.size = 0}; }
-  static Directory parse(ifstream &input) {
+  static Directory parse(istream &input) {
     input.ignore(numeric_limits<streamsize>::max(), '\n'); // skip `$ ls`
     Directory dir = empty();
     while (!input.eof() && input.peek() != '$') {
@@ -52,7 +52,7 @@ void each_entry_recursive(Directory dir, DirConsumer auto visit) {
 
 int main() {
   day(
-      [](ifstream &input) {
+      [](istream &input) {
         input.ignore(numeric_limits<streamsize>::max(), '\n'); // skip `$ cd /`
         return Directory::parse(input);
       },

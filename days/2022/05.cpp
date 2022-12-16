@@ -21,7 +21,7 @@ struct Input {
   }
 };
 
-vector<Stack> parse_stacks(ifstream &input) {
+vector<Stack> parse_stacks(istream &input) {
   vector<vector<char>> hors;
   while (true) {
     vector<char> hor;
@@ -62,7 +62,7 @@ ret:
 
 int main() {
   day(
-      [](ifstream &input) {
+      [](istream &input) {
         Input result;
         result.stacks = parse_stacks(input);
         do {

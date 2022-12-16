@@ -40,7 +40,7 @@ struct BingoGame {
   vector<BingoBoard> boards;
 };
 
-BingoGame parse_bingo_game(ifstream &file) {
+BingoGame parse_bingo_game(istream &file) {
   BingoGame game;
   do {
     uint n;

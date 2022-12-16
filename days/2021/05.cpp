@@ -16,7 +16,7 @@ struct Vent {
 int main() {
   map<Point, int> points;
   day(
-      [](ifstream &file) {
+      [](istream &file) {
         vector<Vent> vents;
         while (file.peek() != EOF) {
           int x1, y1, x2, y2;

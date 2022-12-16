@@ -34,7 +34,7 @@ struct Item {
 int main() {
   using input = pair<vector<Monkey>, vector<Item>>;
   day(
-      [](ifstream &input) {
+      [](istream &input) {
         vector<Monkey> monkeys;
         vector<Item> items;
         do {

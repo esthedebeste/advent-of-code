@@ -16,7 +16,7 @@ using input = vector<sensor>;
 int main() {
   i64 minx = numeric_limits<i64>::max(), maxx = 0;
   day(
-      lines([&](ifstream &input) {
+      lines([&](istream &input) {
         int sx, sy, bx, by;
         input >> "Sensor at x=" >> sx >> ", y=" >> sy >>
             ": closest beacon is at x=" >> bx >> ", y=" >> by;

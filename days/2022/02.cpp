@@ -12,7 +12,7 @@ using namespace std;
 int main() {
   using input = vector<Game> &;
   day(
-      [](ifstream &input) {
+      [](istream &input) {
         vector<Game> games;
         while (!input.eof()) {
           u2 opponent = input.get() - 'A';

@@ -55,3 +55,46 @@ template <std::integral T> struct hash<pos_t<T>> {
 };
 }
 using pos = pos_t<default_pos_t>;
+
+template <typename T>
+int dijkstra(
+    T start, T goal, auto neighbours, auto cost = [](T, T) { return 1; }) {
+  using elem = pair<int, T>;
+  priority_queue<elem, vector<elem>, greater<elem>> queue;
+  unordered_map<T, T> chain;
+  unordered_map<T, int> cost_so_far;
+
+  queue.emplace(0, start);
+  chain[start] = start;
+  cost_so_far[start] = 0;
+
+  while (!queue.empty()) {
+    T current = queue.top().second;
+    queue.pop();
+
+    if (current == goal)
+      break; // found!
+
+    for (T next : neighbours(current)) {
+      int new_cost = cost_so_far[current] + 1;
+      if (!cost_so_far.contains(next) || new_cost < cost_so_far[next]) {
+        cost_so_far[next] = new_cost;
+        chain[next] = current;
+        queue.emplace(new_cost, next);
+      }
+    }
+  }
+
+  int len = 0;
+  T current = goal;
+  if (!chain.contains(goal))
+    return -1; // no path found :(
+  while (current != start) {
+    len++;
+    current = chain[current];
+  }
+  return len;
+}
+template <typename T> auto dijkstra(T start, T goal, auto neighbours) {
+  return dijkstra(start, goal, neighbours, [](T, T) { return 1; });
+}

@@ -9,7 +9,7 @@ constexpr pos drop_pos{500, 0};
 int main() {
   int minx = numeric_limits<int>::max(), maxx = 0, maxy = 0;
   day(
-      [&](ifstream &input) {
+      [&](istream &input) {
         auto parser = lines(
             split_by(" -> ", pair_transform(',', parse<decltype(pos::x)>)));
         vector<vector<pair<int, int>>> lines = parser(input);

@@ -9,7 +9,7 @@ int main() {
   array<uint64_t, 9> stages;
   stages.fill(0);
   day(
-      [&](ifstream &file) {
+      [&](istream &file) {
         do
           stages[file.get() - '0']++;
         while (file.get() != EOF);

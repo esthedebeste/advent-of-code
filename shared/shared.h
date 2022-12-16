@@ -3,6 +3,7 @@
 #include "utils.h"
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <version>
 #if !defined(AOC_YEAR) || !defined(AOC_DAY)
 #error AOC_YEAR and AOC_DAY must be defined
@@ -18,6 +19,7 @@ using uint = unsigned int;
 void day(InputTransform auto transform, auto... func) {
   std::cout << "Running day " AOC_DAY_STR "..." << std::endl;
   int currPart = 0;
+#ifndef AOC_INPUT_PATH
   std::string path = "../input/" AOC_YEAR_STR "/" AOC_DAY_STR ".txt";
   std::cout << "Opening " << path << "..." << std::flush;
   std::ifstream file(path);
@@ -25,16 +27,23 @@ void day(InputTransform auto transform, auto... func) {
     std::cerr << "Could not open file: " << path;
     return;
   }
-  std::cout << "\rTransforming input...        " << std::flush;
-  auto input = transform(file);
-  std::cout << "\rRead and transformed input...    " << std::endl;
+  std::istream &istream = file;
+#else
+  std::istringstream inputstring(
+#include AOC_INPUT_PATH
+  );
+  std::istream &istream = inputstring;
+#endif
+  std::cout << "Processing input..." << std::endl;
+  auto input = transform(istream);
+  std::cout << "Processed input!" << std::endl;
   (
       [&] {
         currPart++;
         std::cout << "Running part " << currPart << "..." << std::endl;
         auto res = func(input);
         std::cout << "Done running part " << currPart << ", "
-                  << "result: '" << res << "'\n";
+                  << "result: `" << res << "`\n";
       }(),
       ...);
   std::cout << "Done running day " AOC_DAY_STR "!\n";

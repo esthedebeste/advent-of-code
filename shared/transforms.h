@@ -8,11 +8,11 @@
 #include <vector>
 
 template <typename T>
-concept InputTransform = requires(T t, std::ifstream &s) { t(s); };
+concept InputTransform = requires(T t, std::istream &s) { t(s); };
 
 auto noop = [](std::string x) { return x; };
 auto full_file(auto transform) {
-  return [=](std::ifstream &file) {
+  return [=](std::istream &file) {
     std::stringstream buffer;
     buffer << file.rdbuf();
     return transform(buffer.str());
@@ -22,8 +22,8 @@ auto full_file() { return full_file(noop); }
 template <class> inline constexpr bool fals = false;
 template <InputTransform TR, size_t Len>
 auto split_by(const char (&delim)[Len], TR transform) {
-  return [=](std::ifstream &file) {
-    using R = std::invoke_result_t<TR, std::ifstream &>;
+  return [=](std::istream &file) {
+    using R = std::invoke_result_t<TR, std::istream &>;
     std::vector<R> result;
     do
       result.push_back(transform(file));
@@ -32,9 +32,9 @@ auto split_by(const char (&delim)[Len], TR transform) {
   };
 }
 template <typename TR> auto split_by(char delim = '\n', TR transform = noop) {
-  if constexpr (std::invocable<TR, std::ifstream &>)
-    return [=](std::ifstream &file) {
-      using R = std::invoke_result_t<TR, std::ifstream &>;
+  if constexpr (std::invocable<TR, std::istream &>)
+    return [=](std::istream &file) {
+      using R = std::invoke_result_t<TR, std::istream &>;
       std::vector<R> result;
       do
         result.push_back(transform(file));
@@ -45,7 +45,7 @@ template <typename TR> auto split_by(char delim = '\n', TR transform = noop) {
     return [=](auto &x) {
       using R = std::invoke_result_t<TR, std::string &>;
       using T = std::remove_cvref_t<decltype(x)>;
-      if constexpr (std::is_same_v<T, std::ifstream>) {
+      if constexpr (std::is_same_v<T, std::istream>) {
         std::vector<R> lines;
         std::string line;
         while (std::getline(x, line, delim))
@@ -60,17 +60,17 @@ template <typename TR> auto split_by(char delim = '\n', TR transform = noop) {
         return lines;
       } else
         static_assert(fals<T>,
-                      "split_by requires a string or ifstream, got a T");
+                      "split_by requires a string or istream, got a T");
     };
   else
     static_assert(fals<TR>, "split_by requires a transform that takes a string "
-                            "or ifstream, got a TR");
+                            "or istream, got a TR");
 }
 auto split_by(char delim = '\n') { return split_by(delim, noop); }
 template <InputTransform TR>
 auto split_to(char delim = '\n', TR transform = noop) {
-  return [=](std::ifstream &file) {
-    using R = std::invoke_result_t<TR, std::ifstream &>;
+  return [=](std::istream &file) {
+    using R = std::invoke_result_t<TR, std::istream &>;
     std::vector<R> result;
     do {
       result.push_back(transform(file));
@@ -83,7 +83,7 @@ auto split_to(auto delim, auto transform) { return split_by(delim, transform); }
 auto lines(auto transform) { return split_to('\n', transform); }
 auto lines() { return lines(noop); }
 auto pair_transform(char delim, InputTransform auto transform) {
-  return [=](std::ifstream &x) {
+  return [=](std::istream &x) {
     auto a = transform(x);
     if (x.peek() != delim)
       throw std::runtime_error("pair transform expected delim, got " +
@@ -104,7 +104,7 @@ auto parse_num(std::string_view str, int base = 10) {
 template <typename T = int> auto to_num(int base = 10) {
   return [=](std::string_view str) { return parse_num<T>(str, base); };
 }
-template <typename T = int> auto parse(std::ifstream &input) {
+template <typename T = int> auto parse(std::istream &input) {
   T parsed{};
   input >> parsed;
   return parsed;

@@ -20,44 +20,6 @@ vector<pos> neighbors(field &grid, pos from) {
   return results;
 }
 
-auto dijkstra(field &field, pos start, pos goal) {
-  using elem = pair<int, pos>;
-  priority_queue<elem, vector<elem>, greater<elem>> queue;
-  unordered_map<pos, pos> chain;
-  unordered_map<pos, int> cost_so_far;
-
-  queue.emplace(0, start);
-  chain[start] = start;
-  cost_so_far[start] = 0;
-
-  while (!queue.empty()) {
-    pos current = queue.top().second;
-    queue.pop();
-
-    if (current == goal)
-      break; // found!
-
-    for (pos next : neighbors(field, current)) {
-      int new_cost = cost_so_far[current] + 1;
-      if (!cost_so_far.contains(next) || new_cost < cost_so_far[next]) {
-        cost_so_far[next] = new_cost;
-        chain[next] = current;
-        queue.emplace(new_cost, next);
-      }
-    }
-  }
-
-  int len = 0;
-  pos current = goal;
-  if (!chain.contains(goal))
-    return -1; // no path found :(
-  while (current != start) {
-    len++;
-    current = chain[current];
-  }
-  return len;
-}
-
 int main() {
   pos start, goal;
   day(
@@ -72,14 +34,16 @@ int main() {
               goal = {i, j};
               input[i][j] = 'z';
             }
-        return dijkstra(input, start, goal);
+        return dijkstra(start, goal,
+                        [&](pos p) { return neighbors(input, p); });
       },
       [&](field &input) {
         int shortest = numeric_limits<int>::max();
         for (int i = 0; i < input.size(); i++)
           for (int j = 0; j < input[i].size(); j++)
             if (input[i][j] == 'a') {
-              auto path = dijkstra(input, {i, j}, goal);
+              auto path = dijkstra(pos{i, j}, goal,
+                                   [&](pos p) { return neighbors(input, p); });
               if (path == -1)
                 continue;
               shortest = min(shortest, path);

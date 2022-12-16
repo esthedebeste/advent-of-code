@@ -58,7 +58,7 @@ template <size_t taillen> auto part(vector<Instruction> &instructions) {
 
 int main() {
   using input = vector<Instruction>;
-  day(lines([](ifstream &input) {
+  day(lines([](istream &input) {
         char dir = input.get();
         input.ignore(1);
         int value;

@@ -7,7 +7,7 @@ using Instruction = variant<int, monostate>; // variant<addx, noop>
 int main() {
   using input = vector<Instruction>;
   day(
-      lines([](ifstream &input) -> Instruction {
+      lines([](istream &input) -> Instruction {
         if (input.peek() == 'a') {
           int amount;
           input >> "addx " >> amount;

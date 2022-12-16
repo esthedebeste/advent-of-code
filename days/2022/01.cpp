@@ -5,7 +5,7 @@ using namespace std;
 int main() {
   using input = vector<uint> &;
   day(
-      [](ifstream &input) {
+      [](istream &input) {
         vector<uint> elves;
         while (!input.eof()) {
           uint elf = 0;

@@ -10,10 +10,18 @@ function(add_year year min_day max_day)
             set(day "0${day}")
         endif()
 
+        set(defs AOC_YEAR=${year} AOC_DAY=${day})
+
+        if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+            file(READ ${CMAKE_CURRENT_SOURCE_DIR}/input/${year}/${day}.txt input)
+            file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/input/${year}/${day}.cpp "R\"==(${input})==\"")
+            set(defs ${defs} AOC_INPUT_PATH=\"${CMAKE_CURRENT_BINARY_DIR}/input/${year}/${day}.cpp\")
+        endif()
+
         add_executable(${year}-${day} ${CMAKE_CURRENT_SOURCE_DIR}/days/${year}/${day}.cpp)
-        target_compile_definitions(${year}-${day} PRIVATE AOC_YEAR=${year} AOC_DAY=${day})
+        target_compile_definitions(${year}-${day} PRIVATE ${defs})
     endforeach()
 endfunction()
 
 add_year(2021 1 8)
-add_year(2022 1 15)
+add_year(2022 1 16)

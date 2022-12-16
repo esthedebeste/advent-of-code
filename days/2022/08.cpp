@@ -8,7 +8,7 @@ using field = vector<vector<uint_fast8_t>>;
 
 int main() {
   day(
-      lines([](ifstream &input) {
+      lines([](istream &input) {
         vector<uint_fast8_t> row;
         while (input.peek() != '\n' && !input.eof())
           row.push_back(input.get() - '0');

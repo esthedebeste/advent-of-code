@@ -38,7 +38,7 @@ template <size_t length> uint part(input input) {
 
 int main() {
   day(
-      [](ifstream &input) {
+      [](istream &input) {
         vector<uint32_t> masks;
         do
           masks.push_back(1 << (input.get() - 'a'));
