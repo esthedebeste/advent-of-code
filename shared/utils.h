@@ -30,10 +30,23 @@ template <typename T1, typename T2> struct std::hash<std::pair<T1, T2>> {
 #ifndef default_pos_t
 #define default_pos_t int
 #endif
+
 template <std::integral T = default_pos_t> struct pos_t {
   T x, y;
-  pos_t<T> up() const { return {x, y - 1}; }
-  pos_t<T> down() const { return {x, y + 1}; }
+  pos_t<T> up() const {
+#if pos_up == 0
+    return {x, y - 1};
+#elif pos_up == 1
+    return {x, y + 1};
+#endif
+  }
+  pos_t<T> down() const {
+#if pos_up == 0
+    return {x, y + 1};
+#elif pos_up == 1
+    return {x, y - 1};
+#endif
+  }
   pos_t<T> left() const { return {x - 1, y}; }
   pos_t<T> right() const { return {x + 1, y}; }
   T manhattan_distance(pos_t<T> other) const {
@@ -44,6 +57,12 @@ template <std::integral T = default_pos_t> struct pos_t {
   }
   friend bool operator<(pos_t<T> a, pos_t<T> b) {
     return a.x < b.x || (a.x == b.x && a.y < b.y);
+  }
+  friend pos_t<T> operator+(pos_t<T> a, pos_t<T> b) {
+    return {a.x + b.x, a.y + b.y};
+  }
+  friend pos_t<T> operator-(pos_t<T> a, pos_t<T> b) {
+    return {a.x - b.x, a.y - b.y};
   }
 };
 

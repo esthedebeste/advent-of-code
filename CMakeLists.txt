@@ -24,4 +24,4 @@ function(add_year year min_day max_day)
 endfunction()
 
 add_year(2021 1 8)
-add_year(2022 1 16)
+add_year(2022 1 17)
