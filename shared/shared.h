@@ -1,6 +1,7 @@
 #pragma once
 #include "transforms.h"
 #include "utils.h"
+#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -35,15 +36,24 @@ void day(InputTransform auto transform, auto... func) {
   std::istream &istream = inputstring;
 #endif
   std::cout << "Processing input..." << std::endl;
+  auto start = std::chrono::high_resolution_clock::now();
   auto input = transform(istream);
-  std::cout << "Processed input!" << std::endl;
+  auto end = std::chrono::high_resolution_clock::now();
+  using dmilli = std::chrono::duration<double, std::milli>;
+  std::cout << "Done processing input! ("
+            << std::chrono::duration_cast<dmilli>(end - start).count() << "ms)"
+            << std::endl;
   (
       [&] {
         currPart++;
         std::cout << "Running part " << currPart << "..." << std::endl;
+        auto start = std::chrono::high_resolution_clock::now();
         auto res = func(input);
-        std::cout << "Done running part " << currPart << ", "
-                  << "result: `" << res << "`\n";
+        auto end = std::chrono::high_resolution_clock::now();
+        std::cout << "Done with part " << currPart << "! Result: `" << res
+                  << "` ("
+                  << std::chrono::duration_cast<dmilli>(end - start).count()
+                  << "ms)" << std::endl;
       }(),
       ...);
   std::cout << "Done running day " AOC_DAY_STR "!\n";
