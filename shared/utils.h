@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 #include <istream>
 #include <limits>
 #include <utility>
