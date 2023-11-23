@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 set(CMAKE_CXX_STANDARD 23)
-project(aoc-2022 CXX)
+project(advent-of-code CXX)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/shared)
 
@@ -25,3 +25,4 @@ endfunction()
 
 add_year(2021 1 8)
 add_year(2022 1 21)
+add_year(2023 1 1)
