@@ -2,6 +2,8 @@
 #include <cassert>
 #include <istream>
 #include <limits>
+#include <queue>
+#include <unordered_map>
 #include <utility>
 /// usage: input >> "Index: " >> index;
 /// skip a string and throw if it doesn't match
@@ -12,9 +14,13 @@ std::istream &operator>>(std::istream &in, const char (&s)[Len]) {
       throw std::invalid_argument("Invalid input");
   return in;
 }
+
 struct skip_until {
   char c;
-  constexpr skip_until(char c) : c{c} {}
+
+  constexpr skip_until(char c)
+    : c{c} {
+  }
 };
 
 std::istream &operator>>(std::istream &in, skip_until s) {
@@ -34,6 +40,7 @@ template <typename T1, typename T2> struct std::hash<std::pair<T1, T2>> {
 
 template <std::integral T = default_pos_t> struct pos_t {
   T x, y;
+
   pos_t<T> up() const {
 #if pos_up == 0
     return {x, y - 1};
@@ -41,6 +48,7 @@ template <std::integral T = default_pos_t> struct pos_t {
     return {x, y + 1};
 #endif
   }
+
   pos_t<T> down() const {
 #if pos_up == 0
     return {x, y + 1};
@@ -48,20 +56,26 @@ template <std::integral T = default_pos_t> struct pos_t {
     return {x, y - 1};
 #endif
   }
+
   pos_t<T> left() const { return {x - 1, y}; }
   pos_t<T> right() const { return {x + 1, y}; }
+
   T manhattan_distance(pos_t<T> other) const {
     return abs(x - other.x) + abs(y - other.y);
   }
+
   friend bool operator==(pos_t<T> a, pos_t<T> b) {
     return a.x == b.x && a.y == b.y;
   }
+
   friend bool operator<(pos_t<T> a, pos_t<T> b) {
     return a.x < b.x || (a.x == b.x && a.y < b.y);
   }
+
   friend pos_t<T> operator+(pos_t<T> a, pos_t<T> b) {
     return {a.x + b.x, a.y + b.y};
   }
+
   friend pos_t<T> operator-(pos_t<T> a, pos_t<T> b) {
     return {a.x - b.x, a.y - b.y};
   }
@@ -74,15 +88,16 @@ template <std::integral T> struct hash<pos_t<T>> {
   }
 };
 }
+
 using pos = pos_t<default_pos_t>;
 
 template <typename T>
 int dijkstra(
     T start, T goal, auto neighbours, auto cost = [](T, T) { return 1; }) {
-  using elem = pair<int, T>;
-  priority_queue<elem, vector<elem>, greater<elem>> queue;
-  unordered_map<T, T> chain;
-  unordered_map<T, int> cost_so_far;
+  using elem = std::pair<int, T>;
+  std::priority_queue<elem, std::vector<elem>, std::greater<elem>> queue;
+  std::unordered_map<T, T> chain;
+  std::unordered_map<T, int> cost_so_far;
 
   queue.emplace(0, start);
   chain[start] = start;
@@ -115,6 +130,7 @@ int dijkstra(
   }
   return len;
 }
+
 template <typename T> auto dijkstra(T start, T goal, auto neighbours) {
   return dijkstra(start, goal, neighbours, [](T, T) { return 1; });
 }

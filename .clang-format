@@ -1,0 +1,5 @@
+BasedOnStyle: LLVM
+FixNamespaceComments: false
+IndentWidth: 1
+UseTab: Always
+TabWidth: 2
