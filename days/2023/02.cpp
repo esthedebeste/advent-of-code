@@ -59,9 +59,9 @@ int main() {
 			return total;
 		},
 		[](input input) {
-			int total = 0;
-			for (auto [index,line] : std::ranges::views::enumerate(input))
-				total += line.red * line.green * line.blue;
-			return total;
+			return std::reduce(input.begin(), input.end(), 0,
+			                   [](int a, auto &b) {
+				                   return a + b.red * b.green * b.blue;
+			                   });
 		});
 }
