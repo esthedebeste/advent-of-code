@@ -19,12 +19,13 @@
 using uint = unsigned int;
 
 void day(InputTransform auto transform, auto... func) {
+    std::ios::sync_with_stdio(false);
 	std::cout << "Running day " AOC_DAY_STR "..." << std::endl;
 	int currPart = 0;
 #ifndef AOC_INPUT_PATH
 	std::string path = "../input/" AOC_YEAR_STR "/" AOC_DAY_STR ".txt";
 	std::cout << "Opening " << path << "..." << std::flush;
-	std::ifstream file(path);
+	std::ifstream file(path,  std::ios_base::binary);
 	if (!file.is_open()) {
 		std::cerr << "Could not open file: " << path;
 		return;
@@ -33,7 +34,7 @@ void day(InputTransform auto transform, auto... func) {
 #else
 	std::istringstream inputstring(
 #include AOC_INPUT_PATH
-		);
+		,  std::ios_base::binary);
 	std::istream &istream = inputstring;
 #endif
 	std::cout << "Processing input..." << std::endl;

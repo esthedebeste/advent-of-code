@@ -3,3 +3,4 @@ FixNamespaceComments: false
 IndentWidth: 1
 UseTab: Always
 TabWidth: 2
+AlignTrailingComments: false
