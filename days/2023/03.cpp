@@ -70,7 +70,7 @@ int main() {
 			uint64_t total = 0;
 			for (const auto &[add, mul, amount, part] : input) {
 				if (part == '*' && amount == 2) total += mul;
-				return total;
 			}
+			return total;
 		});
 }
