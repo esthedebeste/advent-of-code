@@ -41,8 +41,7 @@ void day(InputTransform auto transform, auto... func) {
 	std::chrono::high_resolution_clock::duration total_time{};
 	const auto start = std::chrono::high_resolution_clock::now();
 	auto input = [&] {
-		if constexpr (std::invocable<decltype(transform), std::istream &>)
-			input = std::move(transform(istream));
+		if constexpr (std::invocable<decltype(transform), std::istream &>) return std::move(transform(istream));
 		else {
 #ifndef AOC_INPUT_PATH
 			std::stringstream buffer;
