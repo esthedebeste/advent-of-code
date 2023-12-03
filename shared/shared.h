@@ -17,6 +17,18 @@
 #define AOC_DAY_STR STRINGIFY(AOC_DAY)
 
 using uint = unsigned int;
+using dmilli = std::chrono::duration<double, std::milli>;
+
+void timeit(std::string_view name, auto func) {
+	const auto start = std::chrono::high_resolution_clock::now();
+	func();
+	const auto end = std::chrono::high_resolution_clock::now();
+	std::cout << "TIMEIT: " << name << ": " << std::format(
+			"{:L}",
+			std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
+				end - start)) <<
+		"\n";
+}
 
 void day(InputTransform auto transform, auto... func) {
 	std::ios::sync_with_stdio(false);
@@ -56,7 +68,6 @@ void day(InputTransform auto transform, auto... func) {
 		}
 	}();
 	const auto end = std::chrono::high_resolution_clock::now();
-	using dmilli = std::chrono::duration<double, std::milli>;
 	total_time += end - start;
 	std::cout << "Done processing input! ("
 		<< std::chrono::duration_cast<dmilli>(end - start).count() << "ms)"

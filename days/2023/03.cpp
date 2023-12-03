@@ -1,26 +1,23 @@
 #include "shared.h"
 #include <execution>
-#include <map>
 
-struct PosData {
+struct Number {
 	int add = 0, mul = 1;
 	int amount = 0;
+	char part = 0; // 0 = none, '*' = gear, etc.
 };
 
 int main() {
-	using input = std::tuple<std::unordered_map<pos, PosData>, std::vector<pos>, std::vector<pos>>;
+	using input = std::vector<Number>;
 	day(
 		[](std::string_view string) {
-			input ret;
-			auto &[positions, parts, gears] = ret;
-			positions.reserve(string.size());
-			parts.reserve(string.size());
-			gears.reserve(string.size());
+			const size_t width = string.find('\n');
+			input positions(string.size() / (string.back() == '\n' ? width + 1 : width) * width);
 			pos curr_pos{ 0, 0 };
 			auto &[x, y] = curr_pos;
 			for (auto iter = string.begin(); iter != string.end(); ++iter) {
 				x++;
-				switch (*iter) {
+				switch (const char c = *iter) {
 				case '0':
 				case '1':
 				case '2':
@@ -41,47 +38,39 @@ int main() {
 					--iter;
 					const int numstart = x;
 					x += numwidth - 1;
-					for (pos numberpos{ numstart - 1, y - 1 }; numberpos.x <= x + 1; ++numberpos.x)
-						for (numberpos.y = y - 1; numberpos.y <= y + 1; ++numberpos.y)
-							if (numberpos.y != y || numberpos.x < numstart || numberpos.x > x) {
-								auto &data = positions[numberpos];
-								data.add += number;
-								data.amount++;
-								data.mul *= number;
+					for (int ypos = max(0, y - 1); ypos <= y + 1; ++ypos)
+						for (int xpos = min(max(0, numstart - 1), width), xmax = min(x + 1, width); xpos <= xmax; ++xpos)
+							if (ypos != y || xpos < numstart || xpos > x) {
+								auto &[add, mul, amount, _part] = positions[ypos * width + xpos];
+								add += number, mul *= number, ++amount;
 							}
 					break;
 				}
-				case '\n': x = 0;
+				case '\n':
+					x = 0;
 					y++;
 					break;
-				case '.': break;
-				case '*': gears.push_back(curr_pos);
-					[[fallthrough]];
-				default: parts.push_back(curr_pos);
+				case '.':
+					break;
+				default:
+					positions[y * width + x].part = c;
 					break;
 				}
 			}
-			return ret;
+			return positions;
 		},
 		[](const input &input) {
 			int total = 0;
-			auto &[numbers, parts,_] = input;
-			for (const auto &position : parts) {
-				auto found = numbers.find(position);
-				if (found != numbers.end()) total += found->second.add;
+			for (const auto &[add, mul, amount, part] : input) {
+				if (part) total += add;
 			}
 			return total;
 		},
 		[](const input &input) {
 			uint64_t total = 0;
-			auto &[numbers, _,gears] = input;
-			for (const auto &position : gears) {
-				auto found = numbers.find(position);
-				if (found == numbers.end()) continue;
-				if (found->second.amount != 2) continue;
-				total += found->second.mul;
+			for (const auto &[add, mul, amount, part] : input) {
+				if (part == '*' && amount == 2) total += mul;
+				return total;
 			}
-			return total;
-		}
-		);
+		});
 }
