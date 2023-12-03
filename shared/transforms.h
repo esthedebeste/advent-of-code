@@ -8,7 +8,8 @@
 #include <vector>
 
 template <typename T>
-concept InputTransform = requires(T t, std::istream &s) { t(s); };
+concept InputTransform = requires(T t, std::istream &s) { t(s); } ||
+                         requires(T t, std::string_view s) { t(s); };
 
 auto noop = [](std::string x) { return x; };
 

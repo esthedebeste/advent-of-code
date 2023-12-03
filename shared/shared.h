@@ -19,7 +19,7 @@
 using uint = unsigned int;
 
 void day(InputTransform auto transform, auto... func) {
-    std::ios::sync_with_stdio(false);
+	std::ios::sync_with_stdio(false);
 	std::cout << "Running day " AOC_DAY_STR "..." << std::endl;
 	int currPart = 0;
 #ifndef AOC_INPUT_PATH
@@ -34,13 +34,28 @@ void day(InputTransform auto transform, auto... func) {
 #else
 	std::istringstream inputstring(
 #include AOC_INPUT_PATH
-		,  std::ios_base::binary);
+		, std::ios_base::binary);
 	std::istream &istream = inputstring;
 #endif
 	std::cout << "Processing input..." << std::endl;
 	std::chrono::high_resolution_clock::duration total_time{};
 	const auto start = std::chrono::high_resolution_clock::now();
-	auto input = transform(istream);
+	auto input = [&] {
+		if constexpr (std::invocable<decltype(transform), std::istream &>)
+			input = std::move(transform(istream));
+		else {
+#ifndef AOC_INPUT_PATH
+			std::stringstream buffer;
+			buffer << file.rdbuf();
+			std::string str = buffer.str();
+			return std::move(transform(str));
+#else
+			return std::move(transform(std::string_view(
+#include AOC_INPUT_PATH
+				)));
+#endif
+		}
+	}();
 	const auto end = std::chrono::high_resolution_clock::now();
 	using dmilli = std::chrono::duration<double, std::milli>;
 	total_time += end - start;

@@ -149,3 +149,5 @@ int dijkstra(
 template <typename T> auto dijkstra(T start, T goal, auto neighbours) {
 	return dijkstra(start, goal, neighbours, [](T, T) { return 1; });
 }
+
+constexpr bool isdigit(const char c) { return c >= '0' && c <= '9'; }

@@ -3,6 +3,7 @@ set(CMAKE_CXX_STANDARD 23)
 project(advent-of-code CXX)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/shared)
+file(GLOB_RECURSE shared_sources ${CMAKE_CURRENT_SOURCE_DIR}/shared/*.h)
 
 function(add_year year min_day max_day)
     foreach (day RANGE ${min_day} ${max_day})
@@ -29,11 +30,11 @@ function(add_year year min_day max_day)
             set(defs ${defs} AOC_INPUT_PATH=\"${CMAKE_CURRENT_BINARY_DIR}/input/${year}/${day}.cpp\")
         endif ()
 
-        add_executable(${year}-${day} ${CMAKE_CURRENT_SOURCE_DIR}/days/${year}/${day}.cpp)
+        add_executable(${year}-${day} ${CMAKE_CURRENT_SOURCE_DIR}/days/${year}/${day}.cpp ${shared_sources})
         target_compile_definitions(${year}-${day} PRIVATE ${defs})
     endforeach ()
 endfunction()
 
 add_year(2021 1 8)
 add_year(2022 1 21)
-add_year(2023 1 2)
+add_year(2023 1 3)
