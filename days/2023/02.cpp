@@ -24,19 +24,13 @@ Colors parse_colors(std::istream &input) {
 			char color; // first char of color. r, g, or b
 			input >> color;
 			switch (color) {
-			case 'r':
-				if (value > colors.red)
-					colors.red = value;
+			case 'r': if (value > colors.red) colors.red = value;
 				input.ignore(2); // 'ed'
 				break;
-			case 'g':
-				if (value > colors.green)
-					colors.green = value;
+			case 'g': if (value > colors.green) colors.green = value;
 				input.ignore(4); // 'reen'
 				break;
-			case 'b':
-				if (value > colors.blue)
-					colors.blue = value;
+			case 'b': if (value > colors.blue) colors.blue = value;
 				input.ignore(3); // 'lue'
 				break;
 				[[unlikely]] default:
@@ -53,15 +47,13 @@ int main() {
 		noskipws(lines(&parse_colors)),
 		[](input input) {
 			ptrdiff_t total = 0;
-			for (auto [index,line] : std::ranges::views::enumerate(input))
-				if (line.red <= 12 && line.green <= 13 && line.blue <= 14)
-					total += index + 1;
+			for (auto [index,line] : std::ranges::views::enumerate(input)) if (line.red <= 12 && line.green <= 13 && line.blue <= 14) total += index + 1;
 			return total;
 		},
 		[](input input) {
 			return std::reduce(input.begin(), input.end(), 0,
-			                   [](uint32_t a, const auto &b) {
-				                   return a + b.red * b.green * b.blue;
-			                   });
+												 [](uint32_t a, const auto &b) {
+													 return a + b.red * b.green * b.blue;
+												 });
 		});
 }

@@ -8,9 +8,7 @@ struct PosData {
 };
 
 int main() {
-	using input = std::tuple<std::unordered_map<pos, PosData>,
-	                         std::vector<pos>,
-	                         std::vector<pos>>;
+	using input = std::tuple<std::unordered_map<pos, PosData>, std::vector<pos>, std::vector<pos>>;
 	day(
 		[](std::string_view string) {
 			input ret;
@@ -18,7 +16,7 @@ int main() {
 			positions.reserve(string.size());
 			parts.reserve(string.size());
 			gears.reserve(string.size());
-			pos curr_pos{0, 0};
+			pos curr_pos{ 0, 0 };
 			auto &[x, y] = curr_pos;
 			for (auto iter = string.begin(); iter != string.end(); ++iter) {
 				x++;
@@ -43,11 +41,9 @@ int main() {
 					--iter;
 					const int numstart = x;
 					x += numwidth - 1;
-					for (pos numberpos{numstart - 1, y - 1}; numberpos.x <= x + 1;
-					     ++numberpos.x)
+					for (pos numberpos{ numstart - 1, y - 1 }; numberpos.x <= x + 1; ++numberpos.x)
 						for (numberpos.y = y - 1; numberpos.y <= y + 1; ++numberpos.y)
-							if (numberpos.y != y || numberpos.x < numstart || numberpos.x >
-							    x) {
+							if (numberpos.y != y || numberpos.x < numstart || numberpos.x > x) {
 								auto &data = positions[numberpos];
 								data.add += number;
 								data.amount++;
@@ -55,17 +51,13 @@ int main() {
 							}
 					break;
 				}
-				case '\n':
-					x = 0;
+				case '\n': x = 0;
 					y++;
 					break;
-				case '.':
-					break;
-				case '*':
-					gears.push_back(curr_pos);
+				case '.': break;
+				case '*': gears.push_back(curr_pos);
 					[[fallthrough]];
-				default:
-					parts.push_back(curr_pos);
+				default: parts.push_back(curr_pos);
 					break;
 				}
 			}
@@ -76,8 +68,7 @@ int main() {
 			auto &[numbers, parts,_] = input;
 			for (const auto &position : parts) {
 				auto found = numbers.find(position);
-				if (found != numbers.end())
-					total += found->second.add;
+				if (found != numbers.end()) total += found->second.add;
 			}
 			return total;
 		},
@@ -86,10 +77,8 @@ int main() {
 			auto &[numbers, _,gears] = input;
 			for (const auto &position : gears) {
 				auto found = numbers.find(position);
-				if (found == numbers.end())
-					continue;
-				if (found->second.amount != 2)
-					continue;
+				if (found == numbers.end()) continue;
+				if (found->second.amount != 2) continue;
 				total += found->second.mul;
 			}
 			return total;
