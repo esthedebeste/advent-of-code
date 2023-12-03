@@ -1,20 +1,41 @@
 #include "shared.h"
 #include <execution>
 
-struct Number {
-	int add = 0, mul = 1;
+// My solution assigns a `Spot` value to every position in the grid.
+// To parse, it loops over every position.
+//  If it's a number `N`, it applies the following to the number's neighbour Spots:
+//   |> Increases the `add` value by `N`
+//   |> Multiplies the `mul` value by `N`
+//   |> Increments the `amount` value
+//  If it's a dot, it does nothing.
+//  If its a part, it sets the `part` value to the character representing that part.
+// To solve part 1:
+//  Iterate over all Spots
+//   |> Take the sum of their `add` values.
+// To solve part 2:
+//  Iterate over all Spots.
+//   |> Filter those who have an `amount` value of two (meaning they have two number-neighbours).
+//   |> Filter those who have a `part` value of `*` (meaning there is a gear on that spot).
+//   |> Take the sum of their `mul` values.
+
+struct Spot {
+	// parse-time computed result of adding together all surrounding numbers
+	int add = 0;
+	// parse-time computed result of multiplying together all surrounding numbers
+	int mul = 1;
+	// amount of surrounding numbers
 	int amount = 0;
-	char part = 0; // 0 = none, '*' = gear, etc.
+	// part on this spot. '\0' means none, and '*' means a gear.
+	char part = 0;
 };
 
 int main() {
-	using input = std::vector<Number>;
+	using input = std::vector<Spot>;
 	day(
 		[](std::string_view string) {
 			const size_t width = string.find('\n');
 			input positions(string.size() / (string.back() == '\n' ? width + 1 : width) * width);
-			pos curr_pos{ 0, 0 };
-			auto &[x, y] = curr_pos;
+			int x = 0, y = 0;
 			for (auto iter = string.begin(); iter != string.end(); ++iter) {
 				x++;
 				switch (const char c = *iter) {
