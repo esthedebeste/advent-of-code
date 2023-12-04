@@ -10,8 +10,7 @@
 template <size_t Len>
 std::istream &operator>>(std::istream &in, const char (&s)[Len]) {
 	for (size_t i = 0; i < Len - 1; i++) // -1 to skip the null terminator
-		if (in.get() != s[i])
-			throw std::invalid_argument("Invalid input");
+		if (in.get() != s[i]) throw std::invalid_argument("Invalid input");
 	return in;
 }
 
@@ -30,12 +29,23 @@ bool check(std::istream &in, const char (&s)[Len]) {
 	return true;
 }
 
+template <typename Matcher> concept CheckMatcher = requires(Matcher m, char c) {
+	{ m(c) } -> std::convertible_to<bool>;
+};
+
+/// usage: check(input, isdigit);
+/// skip a character and return false if it doesn't match
+bool check(std::istream &in, CheckMatcher auto matcher) {
+	const bool result = matcher(in.peek());
+	if (result) in.ignore(1);
+	return result;
+}
+
 struct skip_until {
 	char c;
 
 	constexpr skip_until(char c)
-		: c{c} {
-	}
+		: c{ c } { }
 };
 
 std::istream &operator>>(std::istream &in, skip_until s) {
@@ -58,7 +68,7 @@ template <std::integral T = default_pos_t> struct pos_t {
 
 	pos_t<T> up() const {
 #if pos_up == 0
-		return {x, y - 1};
+		return { x, y - 1 };
 #elif pos_up == 1
     return {x, y + 1};
 #endif
@@ -66,14 +76,14 @@ template <std::integral T = default_pos_t> struct pos_t {
 
 	pos_t<T> down() const {
 #if pos_up == 0
-		return {x, y + 1};
+		return { x, y + 1 };
 #elif pos_up == 1
     return {x, y - 1};
 #endif
 	}
 
-	pos_t<T> left() const { return {x - 1, y}; }
-	pos_t<T> right() const { return {x + 1, y}; }
+	pos_t<T> left() const { return { x - 1, y }; }
+	pos_t<T> right() const { return { x + 1, y }; }
 
 	T manhattan_distance(pos_t<T> other) const {
 		return abs(x - other.x) + abs(y - other.y);
@@ -88,20 +98,20 @@ template <std::integral T = default_pos_t> struct pos_t {
 	}
 
 	friend pos_t<T> operator+(pos_t<T> a, pos_t<T> b) {
-		return {a.x + b.x, a.y + b.y};
+		return { a.x + b.x, a.y + b.y };
 	}
 
 	friend pos_t<T> operator-(pos_t<T> a, pos_t<T> b) {
-		return {a.x - b.x, a.y - b.y};
+		return { a.x - b.x, a.y - b.y };
 	}
 };
 
 namespace std {
-template <std::integral T> struct hash<pos_t<T>> {
-	size_t operator()(const pos_t<T> &x) const {
-		return hash<T>()(x.x) ^ hash<T>()(x.y);
-	}
-};
+	template <std::integral T> struct hash<pos_t<T>> {
+		size_t operator()(const pos_t<T> &x) const {
+			return hash<T>()(x.x) ^ hash<T>()(x.y);
+		}
+	};
 }
 
 using pos = pos_t<default_pos_t>;
@@ -122,8 +132,7 @@ int dijkstra(
 		T current = queue.top().second;
 		queue.pop();
 
-		if (current == goal)
-			break; // found!
+		if (current == goal) break; // found!
 
 		for (T next : neighbours(current)) {
 			int new_cost = cost_so_far[current] + 1;
@@ -137,8 +146,7 @@ int dijkstra(
 
 	int len = 0;
 	T current = goal;
-	if (!chain.contains(goal))
-		return -1; // no path found :(
+	if (!chain.contains(goal)) return -1; // no path found :(
 	while (current != start) {
 		len++;
 		current = chain[current];
@@ -150,4 +158,8 @@ template <typename T> auto dijkstra(T start, T goal, auto neighbours) {
 	return dijkstra(start, goal, neighbours, [](T, T) { return 1; });
 }
 
-constexpr bool isdigit(const char c) { return c >= '0' && c <= '9'; }
+namespace utils {
+	constexpr bool isdigit(const char c) { return c >= '0' && c <= '9'; }
+}
+
+using utils::isdigit;

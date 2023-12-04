@@ -24,13 +24,16 @@ Colors parse_colors(std::istream &input) {
 			char color; // first char of color. r, g, or b
 			input >> color;
 			switch (color) {
-			case 'r': if (value > colors.red) colors.red = value;
+			case 'r':
+				if (value > colors.red) colors.red = value;
 				input.ignore(2); // 'ed'
 				break;
-			case 'g': if (value > colors.green) colors.green = value;
+			case 'g':
+				if (value > colors.green) colors.green = value;
 				input.ignore(4); // 'reen'
 				break;
-			case 'b': if (value > colors.blue) colors.blue = value;
+			case 'b':
+				if (value > colors.blue) colors.blue = value;
 				input.ignore(3); // 'lue'
 				break;
 				[[unlikely]] default:
