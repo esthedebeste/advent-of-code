@@ -38,17 +38,18 @@ void day(InputTransform auto transform, auto... func) {
 	std::chrono::high_resolution_clock::duration total_time{};
 	const auto start = std::chrono::high_resolution_clock::now();
 	auto input = [&] {
-		if constexpr (std::invocable<decltype(transform), std::istream &>) {
 #ifndef AOC_INPUT_PATH
-			std::string path = "./input/" AOC_YEAR_STR "/" AOC_DAY_STR ".txt";
-			std::cout << "Opening " << path << "..." << std::flush;
-			std::ifstream file(path,  std::ios_base::binary);
-			if (!file.is_open()) {
-				std::cerr << "Could not open file: " << path;
-				return;
-			}
-			std::istream &istream = file;
-#else
+		std::string path = "./input/" AOC_YEAR_STR "/" AOC_DAY_STR ".txt";
+		std::cout << "Opening " << path << "..." << std::flush;
+		std::ifstream file(path, std::ios_base::binary);
+		if (!file.is_open()) {
+			std::cerr << "Could not open file: " << path;
+			exit(1);
+		}
+		std::istream &istream = file;
+#endif
+		if constexpr (std::invocable<decltype(transform), std::istream &>) {
+#ifdef AOC_INPUT_PATH
 			std::istringstream inputstring(
 #include AOC_INPUT_PATH
 				, std::ios_base::binary);
@@ -92,23 +93,4 @@ void day(InputTransform auto transform, auto... func) {
 			std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
 				total_time)) <<
 		"!\n";
-}
-
-#if __cpp_lib_unreachable >= 202202L
-#define unreachable() std::unreachable() // C++23
-#elif defined(__GNUC__)
-#define unreachable() __builtin_unreachable(); // GCC and Clang
-#elif defined(_MSC_VER)
-#define unreachable() __assume(false); // MSVC
-#endif
-inline constexpr auto max(auto first, auto... args) {
-	auto curr = first;
-	(..., (curr = curr > args ? curr : args));
-	return curr;
-}
-
-inline constexpr auto min(auto first, auto... args) {
-	auto curr = first;
-	(..., (curr = curr < args ? curr : args));
-	return curr;
 }

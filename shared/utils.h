@@ -5,12 +5,35 @@
 #include <queue>
 #include <unordered_map>
 #include <utility>
+
+#if __cpp_lib_unreachable >= 202202L
+#define unreachable() std::unreachable() // C++23
+#elif defined(__GNUC__)
+#define unreachable() __builtin_unreachable(); // GCC and Clang
+#elif defined(_MSC_VER)
+#define unreachable() __assume(false); // MSVC
+#endif
+inline constexpr auto max(auto first, auto... args) {
+	auto curr = first;
+	(..., (curr = curr > args ? curr : args));
+	return curr;
+}
+
+inline constexpr auto min(auto first, auto... args) {
+	auto curr = first;
+	(..., (curr = curr < args ? curr : args));
+	return curr;
+}
+
 /// usage: input >> "Index: " >> index;
-/// skip a string and throw if it doesn't match
+/// skip a string and throw (unreachable) if it doesn't match
 template <size_t Len>
 std::istream &operator>>(std::istream &in, const char (&s)[Len]) {
 	for (size_t i = 0; i < Len - 1; i++) // -1 to skip the null terminator
-		if (in.get() != s[i]) throw std::invalid_argument("Invalid input");
+		if (in.get() != s[i]) {
+			unreachable();
+			exit(1);
+		}
 	return in;
 }
 
@@ -45,7 +68,7 @@ struct skip_until {
 	char c;
 
 	constexpr skip_until(char c)
-		: c{ c } { }
+		: c{c} { }
 };
 
 std::istream &operator>>(std::istream &in, skip_until s) {
@@ -68,7 +91,7 @@ template <std::integral T = default_pos_t> struct pos_t {
 
 	pos_t<T> up() const {
 #if pos_up == 0
-		return { x, y - 1 };
+		return {x, y - 1};
 #elif pos_up == 1
     return {x, y + 1};
 #endif
@@ -76,14 +99,14 @@ template <std::integral T = default_pos_t> struct pos_t {
 
 	pos_t<T> down() const {
 #if pos_up == 0
-		return { x, y + 1 };
+		return {x, y + 1};
 #elif pos_up == 1
     return {x, y - 1};
 #endif
 	}
 
-	pos_t<T> left() const { return { x - 1, y }; }
-	pos_t<T> right() const { return { x + 1, y }; }
+	pos_t<T> left() const { return {x - 1, y}; }
+	pos_t<T> right() const { return {x + 1, y}; }
 
 	T manhattan_distance(pos_t<T> other) const {
 		return abs(x - other.x) + abs(y - other.y);
@@ -98,11 +121,11 @@ template <std::integral T = default_pos_t> struct pos_t {
 	}
 
 	friend pos_t<T> operator+(pos_t<T> a, pos_t<T> b) {
-		return { a.x + b.x, a.y + b.y };
+		return {a.x + b.x, a.y + b.y};
 	}
 
 	friend pos_t<T> operator-(pos_t<T> a, pos_t<T> b) {
-		return { a.x - b.x, a.y - b.y };
+		return {a.x - b.x, a.y - b.y};
 	}
 };
 
@@ -163,3 +186,19 @@ namespace utils {
 }
 
 using utils::isdigit;
+
+pos retrace_colrow(std::istream &istream) {
+	auto until = istream.tellg();
+	istream.seekg(0);
+	pos pos{0, 1};
+	for (char c; istream.tellg() != until;) {
+		istream.get(c);
+		if (c == '\n') {
+			pos.x = 0;
+			pos.y++;
+		} else {
+			pos.x++;
+		}
+	}
+	return pos;
+}

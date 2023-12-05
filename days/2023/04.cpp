@@ -1,14 +1,16 @@
 #include "shared.h"
 #include <execution>
 
+using matching_t = int_fast8_t;
+
 struct Card {
-	int8_t matching = 0;
+	matching_t matching = 0;
 	// for part 2 so that we dont need to create another vector just for amounts
 	int amount = 1;
 };
 
 
-static int8_t parse_card(const char *&input, const char *end, std::vector<uint16_t> &winning) {
+static matching_t parse_card(const char *&input, const char *end, std::vector<uint16_t> &winning) {
 	while (input[0] != ':') ++input;
 	input += 2;
 	winning.clear();
@@ -17,7 +19,7 @@ static int8_t parse_card(const char *&input, const char *end, std::vector<uint16
 		input += 3;
 	}
 	input += 2;
-	int8_t matching = 0;
+	matching_t matching = 0;
 	while (input[0] <= 64 && input < end) {
 		if (const uint16_t card = reinterpret_cast<const uint16_t &>(input[0]);
 			std::find(winning.begin(), winning.end(), card) != winning.end()) {

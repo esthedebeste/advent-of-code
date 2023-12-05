@@ -5,7 +5,7 @@ AlignConsecutiveDeclarations: false
 AlignOperands: false
 AlignTrailingComments: false
 AllowShortCaseLabelsOnASingleLine: false
-AllowShortIfStatementsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: true
 BraceWrapping:
   AfterCaseLabel: false
@@ -27,7 +27,7 @@ BraceWrapping:
 BreakBeforeBraces: Custom
 ColumnLimit: 160
 ContinuationIndentWidth: 2
-Cpp11BracedListStyle: false
+Cpp11BracedListStyle: true
 FixNamespaceComments: false
 IncludeCategories:
   - Regex: '^<.*'
