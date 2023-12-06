@@ -64,6 +64,14 @@ bool check(std::istream &in, CheckMatcher auto matcher) {
 	return result;
 }
 
+/// usage: check(input, 'a');
+/// skip a character and return false if it doesn't match
+bool check(std::istream &in, const char character) {
+	const bool result = in.peek() == character;
+	if (result) in.ignore(1);
+	return result;
+}
+
 struct skip_until {
 	char c;
 
