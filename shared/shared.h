@@ -88,9 +88,6 @@ void day(InputTransform auto transform, auto... func) {
 		}(),
 		...);
 	std::cout << "Done running day " AOC_DAY_STR " in " <<
-		std::format(
-			"{:L}",
-			std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
-				total_time)) <<
-		"!\n";
+		std::chrono::duration_cast<dmilli>(total_time).
+				count() << "ms!\n";
 }
