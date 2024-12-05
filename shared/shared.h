@@ -6,6 +6,9 @@
 #include <iostream>
 #include <sstream>
 #include <format>
+#include <algorithm>
+#include <ranges>
+#include <cmath>
 #include <version>
 #if !defined(AOC_YEAR) || !defined(AOC_DAY)
 #error AOC_YEAR and AOC_DAY must be defined
@@ -19,7 +22,7 @@
 using uint = unsigned int;
 using dmilli = std::chrono::duration<double, std::milli>;
 
-void timeit(std::string_view name, auto func) {
+void timeit(const std::string_view name, auto func) {
 	const auto start = std::chrono::high_resolution_clock::now();
 	func();
 	const auto end = std::chrono::high_resolution_clock::now();
@@ -33,13 +36,12 @@ void timeit(std::string_view name, auto func) {
 void day(InputTransform auto transform, auto... func) {
 	std::ios::sync_with_stdio(false);
 	std::cout << "Running day " AOC_DAY_STR "..." << std::endl;
-	int currPart = 0;
 	std::cout << "Processing input..." << std::endl;
 	std::chrono::high_resolution_clock::duration total_time{};
 	const auto start = std::chrono::high_resolution_clock::now();
 	auto input = [&] {
 #ifndef AOC_INPUT_PATH
-		std::string path = "./input/" AOC_YEAR_STR "/" AOC_DAY_STR ".txt";
+		const std::string path = "./input/" AOC_YEAR_STR "/" AOC_DAY_STR ".txt";
 		std::cout << "Opening " << path << "..." << std::flush;
 		std::ifstream file(path, std::ios_base::binary);
 		if (!file.is_open()) {
@@ -74,6 +76,7 @@ void day(InputTransform auto transform, auto... func) {
 	std::cout << "Done processing input! ("
 		<< std::chrono::duration_cast<dmilli>(end - start).count() << "ms)"
 		<< std::endl;
+	int currPart = 0;
 	(
 		[&] {
 			currPart++;
