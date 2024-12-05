@@ -8,6 +8,7 @@
 #include <format>
 #include <algorithm>
 #include <ranges>
+#include <numeric>
 #include <cmath>
 #include <version>
 #if !defined(AOC_YEAR) || !defined(AOC_DAY)
