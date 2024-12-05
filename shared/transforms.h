@@ -14,10 +14,16 @@ concept InputTransform = requires(T t, std::istream &s) { t(s); } ||
 auto noop = [](std::string x) { return x; };
 
 auto full_file(auto transform) {
-	return [=](std::istream &file) {
-		std::stringstream buffer;
-		buffer << file.rdbuf();
-		return transform(buffer.str());
+	return [=]<class T1>(T1 &file) {
+			using T = std::remove_cvref_t<T1>;
+			if constexpr (std::is_same_v<T, std::istream>) {
+				std::stringstream buffer;
+				buffer << file.rdbuf();
+				const auto str = buffer.str();
+				return transform(str);
+			} else if constexpr (std::is_same_v<T, std::string_view>) {
+				return transform(file);
+			}
 	};
 }
 
