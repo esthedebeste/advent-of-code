@@ -97,6 +97,7 @@ template <typename T1, typename T2> struct std::hash<std::pair<T1, T2>> {
 template <std::integral T = default_pos_t> struct pos_t {
 	T x, y;
 
+	[[nodiscard]]
 	pos_t<T> up() const {
 #if pos_up == 0
 		return {x, y - 1};
@@ -105,6 +106,7 @@ template <std::integral T = default_pos_t> struct pos_t {
 #endif
 	}
 
+	[[nodiscard]]
 	pos_t<T> down() const {
 #if pos_up == 0
 		return {x, y + 1};
@@ -113,11 +115,28 @@ template <std::integral T = default_pos_t> struct pos_t {
 #endif
 	}
 
+	[[nodiscard]]
 	pos_t<T> left() const { return {x - 1, y}; }
+	[[nodiscard]]
 	pos_t<T> right() const { return {x + 1, y}; }
 
+	[[nodiscard]]
+	pos_t<T> rotate_right_90() const {
+#if pos_up == 0
+		return {-y, x};
+#elif pos_up == 1
+		return {y, -x};
+#endif
+	}
+
+	[[nodiscard]]
 	T manhattan_distance(pos_t<T> other) const {
 		return abs(x - other.x) + abs(y - other.y);
+	}
+
+	[[nodiscard]]
+	T to_1d(T width) const {
+		return y * width + x;
 	}
 
 	friend bool operator==(pos_t<T> a, pos_t<T> b) {
@@ -132,8 +151,18 @@ template <std::integral T = default_pos_t> struct pos_t {
 		return {a.x + b.x, a.y + b.y};
 	}
 
-	friend pos_t<T> operator-(pos_t<T> a, pos_t<T> b) {
-		return {a.x - b.x, a.y - b.y};
+	friend pos_t<T> operator-(pos_t<T> a, pos_t<T> b) { return {a.x - b.x, a.y - b.y}; }
+
+	friend pos_t<T> operator*(pos_t<T> pos, T scale) { return {pos.x * scale, pos.y * scale}; }
+	pos_t<T> &operator+=(const pos_t<T> & pos) {
+		x += pos.x;
+		y += pos.y;
+		return *this;
+	}
+	pos_t<T> &operator-=(const pos_t<T> & pos) {
+		x -= pos.x;
+		y -= pos.y;
+		return *this;
 	}
 };
 
