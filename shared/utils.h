@@ -239,3 +239,16 @@ pos retrace_colrow(std::istream &istream) {
 	}
 	return pos;
 }
+
+template <class R, class T, class M>
+R sum(T values, const M& mapper = [](const T& x) { return x; }) {
+	R sum = 0;
+	for (const auto& v : values)
+		sum += mapper(v);
+	return sum;
+}
+
+template <std::unsigned_integral T>
+bool getbit(T number, const uint8_t pos) {
+	return number & (1 << pos);
+}
