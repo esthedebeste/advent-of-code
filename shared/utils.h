@@ -139,6 +139,11 @@ template <std::integral T = default_pos_t> struct pos_t {
 		return y * width + x;
 	}
 
+	[[nodiscard]]
+	static pos_t<T> from_1d(T width, T index) {
+		return {index % width, index / width};
+	}
+
 	friend bool operator==(pos_t<T> a, pos_t<T> b) {
 		return a.x == b.x && a.y == b.y;
 	}
