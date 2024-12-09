@@ -46,18 +46,18 @@ auto part_2(const std::vector<uint8_t> &nums) {
 
 	std::array<decltype(result)::iterator, 10> first_empty;
 	first_empty.fill(result.begin());
+	for (const auto &[length_min_1, first] : std::views::enumerate(first_empty)) {
+		const FILE_LEN length = static_cast<FILE_LEN>(length_min_1) + 1;
+		while (first != result.end()) {
+			if (first->first == EMPTY && length <= first->second)
+				break;
+			++first;
+		}
+	}
 	for (auto &r : result | std::views::reverse) {
 		auto &[ri, rlen] = r;
 		if (ri == EMPTY)
 			continue;
-		for (const auto &[length_min_1, first] : std::views::enumerate(first_empty)) {
-			const FILE_LEN length = static_cast<FILE_LEN>(length_min_1) + 1;
-			while (first != result.end()) {
-				if (first->first == EMPTY && length <= first->second)
-					break;
-				++first;
-			}
-		}
 		for (auto nit = first_empty[rlen - 1]; &*nit < &r; ++nit) {
 			auto &[ni, nlen] = *nit;
 			if (ni != EMPTY)
@@ -66,8 +66,7 @@ auto part_2(const std::vector<uint8_t> &nums) {
 				continue; // doesn't fit
 			const FILE_LEN orig_length = nlen;
 			std::swap(ri, ni);
-			const FILE_LEN length = nlen - rlen;
-			if (length != 0) {
+			if (const FILE_LEN length = nlen - rlen) {
 				nlen = rlen;
 				// add an empty space of (nlen - rlen) length after nit
 				if (auto next = std::next(nit); next != result.end() && next->first == EMPTY) {
