@@ -27,8 +27,7 @@ inline constexpr auto min(auto first, auto... args) {
 
 /// usage: input >> "Index: " >> index;
 /// skip a string and throw (unreachable) if it doesn't match
-template <size_t Len>
-std::istream &operator>>(std::istream &in, const char (&s)[Len]) {
+template <size_t Len> std::istream &operator>>(std::istream &in, const char (&s)[Len]) {
 	for (size_t i = 0; i < Len - 1; i++) // -1 to skip the null terminator
 		if (in.get() != s[i]) {
 			unreachable();
@@ -39,8 +38,7 @@ std::istream &operator>>(std::istream &in, const char (&s)[Len]) {
 
 /// usage: check(input, "Index: ");
 /// skip a string and return false if it doesn't match
-template <size_t Len>
-bool check(std::istream &in, const char (&s)[Len]) {
+template <size_t Len> bool check(std::istream &in, const char (&s)[Len]) {
 	const auto start = in.tellg();
 	for (size_t i = 0; i < Len - 1; i++) {
 		// Len - 1 to skip the null terminator
@@ -52,7 +50,8 @@ bool check(std::istream &in, const char (&s)[Len]) {
 	return true;
 }
 
-template <typename Matcher> concept CheckMatcher = requires(Matcher m, char c) {
+template <typename Matcher>
+concept CheckMatcher = requires(Matcher m, char c) {
 	{ m(c) } -> std::convertible_to<bool>;
 };
 
@@ -60,7 +59,8 @@ template <typename Matcher> concept CheckMatcher = requires(Matcher m, char c) {
 /// skip a character and return false if it doesn't match
 bool check(std::istream &in, CheckMatcher auto matcher) {
 	const bool result = matcher(in.peek());
-	if (result) in.ignore(1);
+	if (result)
+		in.ignore(1);
 	return result;
 }
 
@@ -68,15 +68,15 @@ bool check(std::istream &in, CheckMatcher auto matcher) {
 /// skip a character and return false if it doesn't match
 bool check(std::istream &in, const char character) {
 	const bool result = in.peek() == character;
-	if (result) in.ignore(1);
+	if (result)
+		in.ignore(1);
 	return result;
 }
 
 struct skip_until {
 	char c;
 
-	constexpr skip_until(char c)
-		: c{c} { }
+	constexpr skip_until(char c) : c{c} {}
 };
 
 std::istream &operator>>(std::istream &in, skip_until s) {
@@ -85,9 +85,7 @@ std::istream &operator>>(std::istream &in, skip_until s) {
 }
 
 template <typename T1, typename T2> struct std::hash<std::pair<T1, T2>> {
-	size_t operator()(const pair<T1, T2> &p) const {
-		return std::hash<T1>{}(p.first) ^ std::hash<T2>{}(p.second);
-	}
+	size_t operator()(const pair<T1, T2> &p) const { return std::hash<T1>{}(p.first) ^ std::hash<T2>{}(p.second); }
 };
 
 #ifndef default_pos_t
@@ -102,7 +100,7 @@ template <std::integral T = default_pos_t> struct pos_t {
 #if pos_up == 0
 		return {x, static_cast<T>(y - 1)};
 #elif pos_up == 1
-    return {x, static_cast<T>(y + 1)};
+		return {x, static_cast<T>(y + 1)};
 #endif
 	}
 
@@ -111,14 +109,18 @@ template <std::integral T = default_pos_t> struct pos_t {
 #if pos_up == 0
 		return {x, static_cast<T>(y + 1)};
 #elif pos_up == 1
-    return {x, static_cast<T>(y - 1)};
+		return {x, static_cast<T>(y - 1)};
 #endif
 	}
 
 	[[nodiscard]]
-	pos_t<T> left() const { return {static_cast<T>(x - 1), y}; }
+	pos_t<T> left() const {
+		return {static_cast<T>(x - 1), y};
+	}
 	[[nodiscard]]
-	pos_t<T> right() const { return {static_cast<T>(x + 1), y}; }
+	pos_t<T> right() const {
+		return {static_cast<T>(x + 1), y};
+	}
 
 	[[nodiscard]]
 	std::array<pos_t, 4> neighbours() const {
@@ -149,27 +151,21 @@ template <std::integral T = default_pos_t> struct pos_t {
 		return {index % width, index / width};
 	}
 
-	friend bool operator==(pos_t<T> a, pos_t<T> b) {
-		return a.x == b.x && a.y == b.y;
-	}
+	friend bool operator==(pos_t<T> a, pos_t<T> b) { return a.x == b.x && a.y == b.y; }
 
-	friend bool operator<(pos_t<T> a, pos_t<T> b) {
-		return a.x < b.x || (a.x == b.x && a.y < b.y);
-	}
+	friend bool operator<(pos_t<T> a, pos_t<T> b) { return a.x < b.x || (a.x == b.x && a.y < b.y); }
 
-	friend pos_t<T> operator+(pos_t<T> a, pos_t<T> b) {
-		return {a.x + b.x, a.y + b.y};
-	}
+	friend pos_t<T> operator+(pos_t<T> a, pos_t<T> b) { return {a.x + b.x, a.y + b.y}; }
 
 	friend pos_t<T> operator-(pos_t<T> a, pos_t<T> b) { return {a.x - b.x, a.y - b.y}; }
 
 	friend pos_t<T> operator*(pos_t<T> pos, T scale) { return {pos.x * scale, pos.y * scale}; }
-	pos_t<T> &operator+=(const pos_t<T> & pos) {
+	pos_t<T> &operator+=(const pos_t<T> &pos) {
 		x += pos.x;
 		y += pos.y;
 		return *this;
 	}
-	pos_t<T> &operator-=(const pos_t<T> & pos) {
+	pos_t<T> &operator-=(const pos_t<T> &pos) {
 		x -= pos.x;
 		y -= pos.y;
 		return *this;
@@ -178,17 +174,13 @@ template <std::integral T = default_pos_t> struct pos_t {
 
 namespace std {
 	template <std::integral T> struct hash<pos_t<T>> {
-		size_t operator()(const pos_t<T> &x) const {
-			return hash<T>()(x.x) ^ hash<T>()(x.y);
-		}
+		size_t operator()(const pos_t<T> &x) const { return hash<T>()(x.x) ^ hash<T>()(x.y); }
 	};
 }
 
 using pos = pos_t<default_pos_t>;
 
-template <typename T>
-int dijkstra(
-	T start, T goal, auto neighbours, auto cost = [](T, T) { return 1; }) {
+template <typename T> int dijkstra(T start, T goal, auto neighbours, auto cost = [](T, T) { return 1; }) {
 	using elem = std::pair<int, T>;
 	std::priority_queue<elem, std::vector<elem>, std::greater<elem>> queue;
 	std::unordered_map<T, T> chain;
@@ -202,7 +194,8 @@ int dijkstra(
 		T current = queue.top().second;
 		queue.pop();
 
-		if (current == goal) break; // found!
+		if (current == goal)
+			break; // found!
 
 		for (T next : neighbours(current)) {
 			int new_cost = cost_so_far[current] + 1;
@@ -216,7 +209,8 @@ int dijkstra(
 
 	int len = 0;
 	T current = goal;
-	if (!chain.contains(goal)) return -1; // no path found :(
+	if (!chain.contains(goal))
+		return -1; // no path found :(
 	while (current != start) {
 		len++;
 		current = chain[current];
@@ -228,8 +222,8 @@ template <typename T> auto dijkstra(T start, T goal, auto neighbours) {
 	return dijkstra(start, goal, neighbours, [](T, T) { return 1; });
 }
 
-template<class T>
-void dfs(const T& start, auto run, auto neighbours, auto neighbour_check = [](const T& prev, const T& neighbour){return true;}) {
+template <class T>
+void dfs(const T &start, auto run, auto neighbours, auto neighbour_check = [](const T &prev, const T &neighbour) { return true; }) {
 	std::vector<T> queue;
 	queue.emplace_back(start);
 	while (!queue.empty()) {
@@ -237,7 +231,7 @@ void dfs(const T& start, auto run, auto neighbours, auto neighbour_check = [](co
 		queue.pop_back();
 		if (run(current))
 			continue;
-		for (const T& next : neighbours(current)) {
+		for (const T &next : neighbours(current)) {
 			if (!neighbour_check(current, next))
 				continue;
 			queue.emplace_back(next);
@@ -267,15 +261,10 @@ pos retrace_colrow(std::istream &istream) {
 	return pos;
 }
 
-template <class R, class T, class M>
-R sum(T values, const M& mapper = [](const T& x) { return x; }) {
+template <class R, class T, class M> R sum(T values, const M &mapper = [](const T &x) { return x; }) {
 	R sum = 0;
-	for (const auto& v : values)
-		sum += mapper(v);
+	for (const auto &v : values) sum += mapper(v);
 	return sum;
 }
 
-template <std::unsigned_integral T>
-bool getbit(T number, const uint8_t pos) {
-	return number & (1 << pos);
-}
+template <std::unsigned_integral T> bool getbit(T number, const uint8_t pos) { return number & (1 << pos); }
