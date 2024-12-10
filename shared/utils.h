@@ -100,25 +100,30 @@ template <std::integral T = default_pos_t> struct pos_t {
 	[[nodiscard]]
 	pos_t<T> up() const {
 #if pos_up == 0
-		return {x, y - 1};
+		return {x, static_cast<T>(y - 1)};
 #elif pos_up == 1
-    return {x, y + 1};
+    return {x, static_cast<T>(y + 1)};
 #endif
 	}
 
 	[[nodiscard]]
 	pos_t<T> down() const {
 #if pos_up == 0
-		return {x, y + 1};
+		return {x, static_cast<T>(y + 1)};
 #elif pos_up == 1
-    return {x, y - 1};
+    return {x, static_cast<T>(y - 1)};
 #endif
 	}
 
 	[[nodiscard]]
-	pos_t<T> left() const { return {x - 1, y}; }
+	pos_t<T> left() const { return {static_cast<T>(x - 1), y}; }
 	[[nodiscard]]
-	pos_t<T> right() const { return {x + 1, y}; }
+	pos_t<T> right() const { return {static_cast<T>(x + 1), y}; }
+
+	[[nodiscard]]
+	std::array<pos_t, 4> neighbours() const {
+		return {up(), right(), down(), left()};
+	}
 
 	[[nodiscard]]
 	pos_t<T> rotate_right_90() const {
@@ -221,6 +226,23 @@ int dijkstra(
 
 template <typename T> auto dijkstra(T start, T goal, auto neighbours) {
 	return dijkstra(start, goal, neighbours, [](T, T) { return 1; });
+}
+
+template<class T>
+void dfs(const T& start, auto run, auto neighbours, auto neighbour_check = [](const T& prev, const T& neighbour){return true;}) {
+	std::vector<T> queue;
+	queue.emplace_back(start);
+	while (!queue.empty()) {
+		T current = queue.back();
+		queue.pop_back();
+		if (run(current))
+			continue;
+		for (const T& next : neighbours(current)) {
+			if (!neighbour_check(current, next))
+				continue;
+			queue.emplace_back(next);
+		}
+	}
 }
 
 namespace utils {
