@@ -93,6 +93,7 @@ template <typename T1, typename T2> struct std::hash<std::pair<T1, T2>> {
 #endif
 
 template <std::integral T = default_pos_t> struct pos_t {
+	using member_type = T;
 	T x, y;
 
 	[[nodiscard]]
