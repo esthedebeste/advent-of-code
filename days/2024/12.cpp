@@ -104,7 +104,7 @@ int main() {
 							}
 						}
 					}
-					print_perimeter(size, field, perimeter);
+					// print_perimeter(size, field, perimeter);
 					size_t sides = 0;
 					for (auto &[p, side_done] : perimeter) {
 						if (side_done)
