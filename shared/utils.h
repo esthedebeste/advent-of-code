@@ -5,6 +5,7 @@
 #include <queue>
 #include <unordered_map>
 #include <utility>
+#include <cstdint>
 
 #if __cpp_lib_unreachable >= 202202L
 #define unreachable() std::unreachable() // C++23
@@ -15,13 +16,13 @@
 #endif
 inline constexpr auto max(auto first, auto... args) {
 	auto curr = first;
-	(..., (curr = curr > args ? curr : args));
+	(..., (curr > args ? curr : (curr = args)));
 	return curr;
 }
 
 inline constexpr auto min(auto first, auto... args) {
 	auto curr = first;
-	(..., (curr = curr < args ? curr : args));
+	(..., (curr < args ? curr : (curr = args)));
 	return curr;
 }
 
@@ -161,6 +162,11 @@ template <std::integral T = default_pos_t> struct pos_t {
 	friend pos_t<T> operator-(pos_t<T> a, pos_t<T> b) { return {a.x - b.x, a.y - b.y}; }
 
 	friend pos_t<T> operator*(pos_t<T> pos, T scale) { return {pos.x * scale, pos.y * scale}; }
+
+	friend std::ostream &operator<<(std::ostream &stream, const pos_t<T> &pos) {
+		return stream << "(" << pos.x << ", " << pos.y << ")";
+	}
+
 	pos_t<T> &operator+=(const pos_t<T> &pos) {
 		x += pos.x;
 		y += pos.y;
@@ -173,6 +179,7 @@ template <std::integral T = default_pos_t> struct pos_t {
 	}
 };
 
+
 namespace std {
 	template <std::integral T> struct hash<pos_t<T>> {
 		size_t operator()(const pos_t<T> &x) const { return hash<T>()(x.x) ^ hash<T>()(x.y); }
@@ -181,7 +188,7 @@ namespace std {
 
 using pos = pos_t<default_pos_t>;
 
-template <typename T> int dijkstra(T start, T goal, auto neighbours, auto cost = [](T, T) { return 1; }) {
+template <typename T> int dijkstra(T start, T goal, auto neighbours, auto cost = [](const T &, const T &) { return 1; }) {
 	using elem = std::pair<int, T>;
 	std::priority_queue<elem, std::vector<elem>, std::greater<elem>> queue;
 	std::unordered_map<T, T> chain;
@@ -199,7 +206,7 @@ template <typename T> int dijkstra(T start, T goal, auto neighbours, auto cost =
 			break; // found!
 
 		for (T next : neighbours(current)) {
-			int new_cost = cost_so_far[current] + 1;
+			int new_cost = cost_so_far[current] + cost(current, next);
 			if (!cost_so_far.contains(next) || new_cost < cost_so_far[next]) {
 				cost_so_far[next] = new_cost;
 				chain[next] = current;
