@@ -1,11 +1,11 @@
 #pragma once
 #include <cassert>
+#include <cstdint>
 #include <istream>
 #include <limits>
 #include <queue>
 #include <unordered_map>
 #include <utility>
-#include <cstdint>
 
 #if __cpp_lib_unreachable >= 202202L
 #define unreachable() std::unreachable() // C++23
@@ -130,6 +130,15 @@ template <std::integral T = default_pos_t> struct pos_t {
 	}
 
 	[[nodiscard]]
+	pos_t<T> rotate_left_90() const {
+#if pos_up == 0
+		return {y, -x};
+#elif pos_up == 1
+		return {-y, x};
+#endif
+	}
+
+	[[nodiscard]]
 	pos_t<T> rotate_right_90() const {
 #if pos_up == 0
 		return {-y, x};
@@ -163,9 +172,7 @@ template <std::integral T = default_pos_t> struct pos_t {
 
 	friend pos_t<T> operator*(pos_t<T> pos, T scale) { return {pos.x * scale, pos.y * scale}; }
 
-	friend std::ostream &operator<<(std::ostream &stream, const pos_t<T> &pos) {
-		return stream << "(" << pos.x << ", " << pos.y << ")";
-	}
+	friend std::ostream &operator<<(std::ostream &stream, const pos_t<T> &pos) { return stream << "(" << pos.x << ", " << pos.y << ")"; }
 
 	pos_t<T> &operator+=(const pos_t<T> &pos) {
 		x += pos.x;
@@ -188,7 +195,10 @@ namespace std {
 
 using pos = pos_t<default_pos_t>;
 
-template <typename T> int dijkstra(T start, T goal, auto neighbours, auto cost = [](const T &, const T &) { return 1; }) {
+template <typename T>
+int dijkstra(
+	T start, auto is_goal, auto neighbours, auto neighbour_check = [](const T &prev, const T &neighbour) { return true; },
+	auto cost = [](const T &, const T &) { return 1; }) {
 	using elem = std::pair<int, T>;
 	std::priority_queue<elem, std::vector<elem>, std::greater<elem>> queue;
 	std::unordered_map<T, T> chain;
@@ -202,10 +212,13 @@ template <typename T> int dijkstra(T start, T goal, auto neighbours, auto cost =
 		T current = queue.top().second;
 		queue.pop();
 
-		if (current == goal)
-			break; // found!
+		if (is_goal(current)) {
+			return cost_so_far[current];
+		}
 
 		for (T next : neighbours(current)) {
+			if (!neighbour_check(current, next))
+				continue;
 			int new_cost = cost_so_far[current] + cost(current, next);
 			if (!cost_so_far.contains(next) || new_cost < cost_so_far[next]) {
 				cost_so_far[next] = new_cost;
@@ -215,19 +228,11 @@ template <typename T> int dijkstra(T start, T goal, auto neighbours, auto cost =
 		}
 	}
 
-	int len = 0;
-	T current = goal;
-	if (!chain.contains(goal))
-		return -1; // no path found :(
-	while (current != start) {
-		len++;
-		current = chain[current];
-	}
-	return len;
+	return -1; // no path found :(
 }
 
 template <typename T> auto dijkstra(T start, T goal, auto neighbours) {
-	return dijkstra(start, goal, neighbours, [](T, T) { return 1; });
+	return dijkstra(start, [&](const T &c) { return c == goal; }, neighbours, [](T, T) { return 1; });
 }
 
 template <class T>
