@@ -1,6 +1,7 @@
 #pragma once
 #include <cassert>
 #include <cstdint>
+#include <functional>
 #include <istream>
 #include <limits>
 #include <queue>
@@ -274,7 +275,7 @@ pos retrace_colrow(std::istream &istream) {
 	return pos;
 }
 
-template <class R, class T, class M> R sum(T values, const M &mapper = [](const T &x) { return x; }) {
+template <class R, class T, class M = std::identity> R sum(T values, const M &mapper = std::identity{}) {
 	R sum = 0;
 	for (const auto &v : values) sum += mapper(v);
 	return sum;
