@@ -88,7 +88,7 @@ auto split_to(char delim = '\n', TR transform = noop) {
 		do {
 			result.push_back(transform(file));
 			file >> skip_until(delim);
-		} while (file.good());
+		} while (file.good() && file.peek() != EOF);
 		return result;
 	};
 }
