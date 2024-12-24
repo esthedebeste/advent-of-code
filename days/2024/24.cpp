@@ -1,24 +1,28 @@
 #include <set>
 #include "shared.h"
 
-const std::string &name(const char c, const uint8_t number) {
-	static std::unordered_map<uint16_t, std::string> cache;
-	std::string &name = cache[static_cast<uint16_t>(c) << 8 | number];
-	if (!name.empty())
-		return name;
-	name += c;
-	if (number < 10)
-		name += '0';
-	name += std::to_string(number);
-	return name;
+using Operand = uint32_t;
+Operand name(const char c, const uint8_t number) {
+	return (static_cast<uint32_t>(c) << 16) | (static_cast<uint32_t>(number / 10 + '0') << 8) | static_cast<uint32_t>(number % 10 + '0');
+}
+Operand name(const char c[4]) {
+	return (static_cast<uint32_t>(c[0]) << 16) | (static_cast<uint32_t>(c[1]) << 8) | static_cast<uint32_t>(c[2]);
+}
+std::string operand_str(const Operand operand) {
+	char str[4];
+	str[0] = static_cast<char>(operand >> 16);
+	str[1] = static_cast<char>(operand >> 8);
+	str[2] = static_cast<char>(operand);
+	str[3] = '\0';
+	return std::string(str);
 }
 enum Operator : uint8_t { OR, AND, XOR, ALWAYS_TRUE, ALWAYS_FALSE };
 struct Operation;
-using World = std::unordered_map<std::string, Operation>;
+using World = std::unordered_map<Operand, Operation>;
 struct Operation {
 	Operator op;
-	std::pair<std::string, std::string> operands;
-	Operation(const Operator op, const std::string &left, const std::string &right) : op(op), operands(std::minmax(left, right)) {}
+	std::pair<Operand, Operand> operands;
+	Operation(const Operator op, const Operand left, const Operand right) : op(op), operands(std::minmax(left, right)) {}
 	explicit Operation(const bool always) : op(always ? ALWAYS_TRUE : ALWAYS_FALSE) {}
 	auto operator<=>(const Operation &) const = default;
 
@@ -46,7 +50,7 @@ struct Operation {
 
 template <> struct std::hash<Operation> {
 	size_t operator()(const Operation &o) const noexcept {
-		return std::hash<uint8_t>{}(o.op) ^ std::hash<std::pair<std::string, std::string>>{}(o.operands);
+		return std::hash<uint8_t>{}(o.op) ^ std::hash<std::pair<Operand, Operand>>{}(o.operands);
 	}
 };
 
@@ -56,16 +60,16 @@ int main() {
 		[](std::istream &is) -> World {
 			World world{};
 			do {
-				char name[4];
+				char constant[4];
 				char value;
-				is >> name >> ": " >> value;
-				world.emplace(name, Operation(value == '1'));
+				is >> constant >> ": " >> value;
+				world.emplace(name(constant), Operation(value == '1'));
 			} while (check(is, '\n') && is.peek() != '\n');
 			is >> '\n';
 			do {
-				char left[4], right[4], name[4];
+				char left[4], right[4], to[4];
 				char op_first;
-				is >> left >> " " >> op_first >> skip_until(' ') >> right >> " -> " >> name;
+				is >> left >> " " >> op_first >> skip_until(' ') >> right >> " -> " >> to;
 				Operator op;
 				switch (op_first) {
 				case 'O':
@@ -80,7 +84,7 @@ int main() {
 				default:
 					unreachable();
 				}
-				world.emplace(name, Operation(op, left, right));
+				world.emplace(name(to), Operation(op, name(left), name(right)));
 			} while (check(is, '\n') && std::isalpha(is.peek()));
 			return world;
 		},
@@ -98,8 +102,8 @@ int main() {
 			return z;
 		},
 		[&](const World &world) {
-			std::unordered_map<Operation, std::string> operation_name{};
-			std::unordered_map<std::pair<Operator, std::string>, std::string> other_operand{};
+			std::unordered_map<Operation, Operand> operation_name{};
+			std::unordered_map<std::pair<Operator, Operand>, Operand> other_operand{};
 			for (const auto &[name, operation] : world) {
 				operation_name.emplace(operation, name);
 				if (operation.is_const())
@@ -108,8 +112,8 @@ int main() {
 				other_operand.emplace(std::make_pair(operation.op, operation.operands.second), operation.operands.first);
 			}
 
-			std::set<std::string> swaps{};
-			std::string in_c = operation_name.at({AND, "x00", "y00"});
+			std::set<Operand> swaps{};
+			Operand in_c = operation_name.at({AND, name('x', 0), name('y', 0)});
 			// aoc is very very very very nice to us and does not put more than one problem in any given adder block
 			for (uint8_t i = 1; i < highest_z_bit; ++i) {
 				const auto &x_name = name('x', i);
@@ -178,7 +182,7 @@ int main() {
 				for (const auto &[i, s] : std::views::enumerate(swaps)) {
 					if (i != 0)
 						out << ',';
-					out << s;
+					out << operand_str(s);
 				}
 			});
 		});
