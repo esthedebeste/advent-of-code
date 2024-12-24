@@ -86,6 +86,19 @@ std::istream &operator>>(std::istream &in, skip_until s) {
 	return in;
 }
 
+template<class G>
+struct print_fun {
+	G fun;
+
+	explicit constexpr print_fun(G fun) : fun{fun} {}
+};
+
+template<class G>
+std::ostream &operator<<(std::ostream &in, const print_fun<G>& f) {
+	f.fun(in);
+	return in;
+}
+
 template <typename T1, typename T2> struct std::hash<std::pair<T1, T2>> {
 	size_t operator()(const pair<T1, T2> &p) const { return std::hash<T1>{}(p.first) ^ std::hash<T2>{}(p.second); }
 };
