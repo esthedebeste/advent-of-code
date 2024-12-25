@@ -52,6 +52,19 @@ template <size_t Len> bool check(std::istream &in, const char (&s)[Len]) {
 	return true;
 }
 
+/// usage: check(input, "Index: ");
+/// skip a string and return false if it doesn't match
+template <size_t Len> bool check(std::string_view &in, const char (&s)[Len]) {
+	if (in.length() < Len - 1)
+		return false;
+	for (size_t i = 0; i < Len - 1; i++)
+		// Len - 1 to skip the null terminator
+		if (in[i] != s[i])
+			return false;
+	in = in.substr(Len - 1);
+	return true;
+}
+
 template <typename Matcher>
 concept CheckMatcher = requires(Matcher m, char c) {
 	{ m(c) } -> std::convertible_to<bool>;
@@ -66,12 +79,34 @@ bool check(std::istream &in, CheckMatcher auto matcher) {
 	return result;
 }
 
+/// usage: check(input, isdigit);
+/// skip a character and return false if it doesn't match
+bool check(std::string_view &in, CheckMatcher auto matcher) {
+	if (in.empty())
+		return false;
+	const bool result = matcher(in[0]);
+	if (result)
+		in = in.substr(1);
+	return result;
+}
+
 /// usage: check(input, 'a');
 /// skip a character and return false if it doesn't match
 bool check(std::istream &in, const char character) {
 	const bool result = in.peek() == character;
 	if (result)
 		in.ignore(1);
+	return result;
+}
+
+/// usage: check(input, isdigit);
+/// skip a character and return false if it doesn't match
+bool check(std::string_view &in, const char character) {
+	if (in.empty())
+		return false;
+	const bool result = in[0] == character;
+	if (result)
+		in = in.substr(1);
 	return result;
 }
 
