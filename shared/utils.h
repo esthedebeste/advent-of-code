@@ -121,15 +121,13 @@ std::istream &operator>>(std::istream &in, skip_until s) {
 	return in;
 }
 
-template<class G>
-struct print_fun {
+template <class G> struct print_fun {
 	G fun;
 
 	explicit constexpr print_fun(G fun) : fun{fun} {}
 };
 
-template<class G>
-std::ostream &operator<<(std::ostream &in, const print_fun<G>& f) {
+template <class G> std::ostream &operator<<(std::ostream &in, const print_fun<G> &f) {
 	f.fun(in);
 	return in;
 }
@@ -281,7 +279,9 @@ int dijkstra(
 }
 
 template <typename T> auto dijkstra(T start, T goal, auto neighbours) {
-	return dijkstra(start, [&](const T &c) { return c == goal; }, neighbours, [](T, T) { return 1; });
+	return dijkstra(
+		start, [&](const T &c) { return c == goal; }, neighbours, [](const T &, const T &) { return true; },
+		[](const T &, const T &) { return 1; });
 }
 
 template <class T>

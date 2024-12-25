@@ -128,7 +128,7 @@ int main() {
   pos start, goal;
   day(
       [](istream &input) {
-        input >> noskipws;
+        input >> std::noskipws;
         auto vec = lines(parse<room>)(input);
         map<roomid, room> rooms;
         for (auto &v : vec) {

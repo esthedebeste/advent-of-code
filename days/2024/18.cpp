@@ -42,5 +42,6 @@ int main() {
 							[](const pos_t<> &prev, const pos_t<> &neighbour) { return 1; }))
 					return fall;
 			}
+			unreachable();
 		});
 }

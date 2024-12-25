@@ -157,5 +157,6 @@ int main() {
 					}
 				}
 			};
+			unreachable();
 		});
 }
