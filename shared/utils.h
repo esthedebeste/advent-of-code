@@ -15,15 +15,20 @@
 #elif defined(_MSC_VER)
 #define unreachable() __assume(false); // MSVC
 #endif
-inline constexpr auto max(auto first, auto... args) {
+#ifdef _MSC_VER
+#define really_always_inline __forceinline
+#else
+#define really_always_inline inline __attribute__((always_inline))
+#endif
+constexpr auto max(auto first, auto... args) {
 	auto curr = first;
-	(..., (curr > args ? curr : (curr = args)));
+	(..., (curr > args ? curr : curr = args));
 	return curr;
 }
 
-inline constexpr auto min(auto first, auto... args) {
+constexpr auto min(auto first, auto... args) {
 	auto curr = first;
-	(..., (curr < args ? curr : (curr = args)));
+	(..., (curr < args ? curr : curr = args));
 	return curr;
 }
 
@@ -32,8 +37,7 @@ inline constexpr auto min(auto first, auto... args) {
 template <size_t Len> std::istream &operator>>(std::istream &in, const char (&s)[Len]) {
 	for (size_t i = 0; i < Len - 1; i++) // -1 to skip the null terminator
 		if (in.get() != s[i]) {
-			unreachable();
-			exit(1);
+			unreachable(), std::exit(1);
 		}
 	return in;
 }
@@ -92,7 +96,7 @@ bool check(std::string_view &in, CheckMatcher auto matcher) {
 
 /// usage: check(input, 'a');
 /// skip a character and return false if it doesn't match
-bool check(std::istream &in, const char character) {
+inline bool check(std::istream &in, const char character) {
 	const bool result = in.peek() == character;
 	if (result)
 		in.ignore(1);
@@ -101,7 +105,7 @@ bool check(std::istream &in, const char character) {
 
 /// usage: check(input, isdigit);
 /// skip a character and return false if it doesn't match
-bool check(std::string_view &in, const char character) {
+inline bool check(std::string_view &in, const char character) {
 	if (in.empty())
 		return false;
 	const bool result = in[0] == character;
@@ -113,10 +117,10 @@ bool check(std::string_view &in, const char character) {
 struct skip_until {
 	char c;
 
-	constexpr skip_until(char c) : c{c} {}
+	constexpr skip_until(const char c) : c{c} {}
 };
 
-std::istream &operator>>(std::istream &in, skip_until s) {
+inline std::istream &operator>>(std::istream &in, const skip_until s) {
 	in.ignore(std::numeric_limits<std::streamsize>::max(), s.c);
 	return in;
 }
@@ -234,17 +238,15 @@ template <std::integral T = default_pos_t> struct pos_t {
 };
 
 
-namespace std {
-	template <std::integral T> struct hash<pos_t<T>> {
-		size_t operator()(const pos_t<T> &x) const { return hash<T>()(x.x) ^ hash<T>()(x.y); }
-	};
-}
+template <std::integral T> struct std::hash<pos_t<T>> {
+	size_t operator()(const pos_t<T> &x) const { return hash<T>()(x.x) ^ hash<T>()(x.y); }
+};
 
 using pos = pos_t<default_pos_t>;
 
 template <typename T>
 int dijkstra(
-	T start, auto is_goal, auto neighbours, auto neighbour_check = [](const T &prev, const T &neighbour) { return true; },
+	T start, auto is_goal, auto neighbours, auto neighbour_check = [](const T &, const T &) { return true; },
 	auto cost = [](const T &, const T &) { return 1; }) {
 	using elem = std::pair<int, T>;
 	std::priority_queue<elem, std::vector<elem>, std::greater<elem>> queue;
@@ -284,8 +286,7 @@ template <typename T> auto dijkstra(T start, T goal, auto neighbours) {
 		[](const T &, const T &) { return 1; });
 }
 
-template <class T>
-void dfs(const T &start, auto run, auto neighbours, auto neighbour_check = [](const T &prev, const T &neighbour) { return true; }) {
+template <class T> void dfs(const T &start, auto run, auto neighbours, auto neighbour_check = [](const T &, const T &) { return true; }) {
 	std::vector<T> queue;
 	queue.emplace_back(start);
 	while (!queue.empty()) {
@@ -307,8 +308,8 @@ namespace utils {
 
 using utils::isdigit;
 
-pos retrace_colrow(std::istream &istream) {
-	auto until = istream.tellg();
+inline pos retrace_colrow(std::istream &istream) {
+	const auto until = istream.tellg();
 	istream.seekg(0);
 	pos pos{0, 1};
 	for (char c; istream.tellg() != until;) {
@@ -329,4 +330,4 @@ template <class R, class T, class M = std::identity> R sum(T values, const M &ma
 	return sum;
 }
 
-template <std::unsigned_integral T> bool getbit(T number, const uint8_t pos) { return number & (1 << pos); }
+template <std::unsigned_integral T> bool getbit(T number, const uint8_t pos) { return number & 1 << pos; }

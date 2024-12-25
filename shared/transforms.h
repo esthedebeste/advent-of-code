@@ -1,32 +1,19 @@
 #pragma once
-#include <charconv>
-#include <fstream>
 #include <sstream>
 #include <string>
 #include <type_traits>
+#include <concepts>
 #include <vector>
 #include "utils.h"
 
-template <typename T>
+template <class T>
 concept InputTransform = requires(T t, std::istream &s) { t(s); } || requires(T t, std::string_view s) { t(s); };
 
-auto noop = [](std::string x) { return x; };
+inline auto just_a_string = [](const std::string &arg) -> std::string { return arg; };
 
-auto full_file(auto transform) {
-	return [=]<class T1>(T1 &file) {
-		using T = std::remove_cvref_t<T1>;
-		if constexpr (std::is_same_v<T, std::istream>) {
-			std::stringstream buffer;
-			buffer << file.rdbuf();
-			const auto str = buffer.str();
-			return transform(str);
-		} else if constexpr (std::is_same_v<T, std::string_view>) {
-			return transform(file);
-		}
-	};
+inline auto full_file() {
+	return [](const std::string_view str) { return std::string{str}; };
 }
-
-auto full_file() { return full_file(noop); }
 template <class> inline constexpr bool fals = false;
 
 template <InputTransform TR, size_t Len> auto split_by(const char (&delim)[Len], TR transform) {
@@ -34,24 +21,24 @@ template <InputTransform TR, size_t Len> auto split_by(const char (&delim)[Len],
 		using R = std::invoke_result_t<TR, std::istream &>;
 		std::vector<R> result;
 		do result.push_back(transform(file));
-		while (file.peek() != EOF && file.peek() == delim[0] && file >> delim);
+		while (file.peek() != EOF && check(file, delim));
 		return result;
 	};
 }
 
-template <typename TR> auto split_by(char delim = '\n', TR transform = noop) {
+template <class TR> auto split_by(char delim = '\n', TR transform = just_a_string) {
 	if constexpr (std::invocable<TR, std::istream &>)
 		return [=](std::istream &file) {
 			using R = std::invoke_result_t<TR, std::istream &>;
 			std::vector<R> result;
 			do result.push_back(transform(file));
-			while (file.peek() == delim && file.ignore(1));
+			while (check(file, delim));
 			return result;
 		};
 	else if constexpr (std::invocable<TR, std::string &>)
-		return [=](auto &x) {
+		return [=]<class RF>(RF &x) {
 			using R = std::invoke_result_t<TR, std::string &>;
-			using T = std::remove_cvref_t<decltype(x)>;
+			using T = std::remove_cvref_t<RF>;
 			if constexpr (std::is_same_v<T, std::istream>) {
 				std::vector<R> lines;
 				std::string line;
@@ -72,23 +59,10 @@ template <typename TR> auto split_by(char delim = '\n', TR transform = noop) {
 									"or istream, got a TR");
 }
 
-auto split_by(char delim = '\n') { return split_by(delim, noop); }
+inline auto split_by(const char delim = '\n') { return split_by(delim, just_a_string); }
 
-template <InputTransform TR> auto split_to(char delim = '\n', TR transform = noop) {
-	return [=](std::istream &file) {
-		using R = std::invoke_result_t<TR, std::istream &>;
-		std::vector<R> result;
-		do {
-			result.push_back(transform(file));
-			file >> skip_until(delim);
-		} while (file.good() && file.peek() != EOF);
-		return result;
-	};
-}
-
-auto split_to(auto delim, auto transform) { return split_by(delim, transform); }
 auto lines(auto transform) { return split_by('\n', transform); }
-auto lines() { return lines(noop); }
+inline auto lines() { return lines(just_a_string); }
 
 auto noskipws(auto transform) {
 	return [=](std::istream &file) {
@@ -98,7 +72,7 @@ auto noskipws(auto transform) {
 	};
 }
 
-auto pair_transform(char delim, InputTransform auto transform) {
+auto pair_transform(const char delim, InputTransform auto transform) {
 	return [=](std::istream &x) {
 		auto a = transform(x);
 		if (x.peek() != delim)
@@ -109,19 +83,19 @@ auto pair_transform(char delim, InputTransform auto transform) {
 	};
 }
 
-template <typename T = int> auto parse_num(std::string_view str, int base = 10) {
+template <class T = int> auto parse_num(std::string_view str, int base = 10) {
 	T number;
 	std::from_chars(str.data(), str.data() + str.size(), number, base);
 	return number;
 }
 
-template <typename T = int> auto parse(std::istream &input) {
+template <class T = int> auto parse(std::istream &input) {
 	T parsed{};
 	input >> parsed;
 	return parsed;
 }
 
-template <typename N = int> auto to_num(int base = 10) {
+template <class N = int> auto to_num(int base = 10) {
 	return [=]<class T>(T &str) {
 		using R = std::remove_cvref_t<T>;
 		if constexpr (std::is_same_v<R, std::string_view>) {
