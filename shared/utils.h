@@ -331,3 +331,50 @@ template <class R, class T, class M = std::identity> R sum(T values, const M &ma
 }
 
 template <std::unsigned_integral T> bool getbit(T number, const uint8_t pos) { return number & 1 << pos; }
+
+// floor(logn(x) + 1) = the length of the integer in base 10
+int intwidth(uint64_t x) {
+	// uint64_t maximum =
+	//       18446744073709551615
+	// so this works :)
+	/**/ if (x >= 10000000000000000000ull)
+		return 20;
+	else if (x >= 1000000000000000000ull)
+		return 19;
+	else if (x >= 100000000000000000ull)
+		return 18;
+	else if (x >= 10000000000000000ull)
+		return 17;
+	else if (x >= 1000000000000000ull)
+		return 16;
+	else if (x >= 100000000000000ull)
+		return 15;
+	else if (x >= 10000000000000ull)
+		return 14;
+	else if (x >= 1000000000000ull)
+		return 13;
+	else if (x >= 100000000000ull)
+		return 12;
+	else if (x >= 10000000000ull)
+		return 11;
+	else if (x >= 1000000000ull)
+		return 10;
+	else if (x >= 100000000ull)
+		return 9;
+	else if (x >= 10000000ull)
+		return 8;
+	else if (x >= 1000000ull)
+		return 7;
+	else if (x >= 100000ull)
+		return 6;
+	else if (x >= 10000ull)
+		return 5;
+	else if (x >= 1000ull)
+		return 4;
+	else if (x >= 100ull)
+		return 3;
+	else if (x >= 10ull)
+		return 2;
+	else
+		return 1;
+}
