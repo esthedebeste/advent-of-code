@@ -1,5 +1,8 @@
 .vscode
+.vs
 .idea
 build
 input
 output
+vcpkg_installed
+CMakeUserSettings.json

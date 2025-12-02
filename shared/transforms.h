@@ -32,7 +32,7 @@ template <class TR> auto split_by(char delim = '\n', TR transform = just_a_strin
 			using R = std::invoke_result_t<TR, std::istream &>;
 			std::vector<R> result;
 			do result.push_back(transform(file));
-			while (check(file, delim));
+			while (check(file, delim) && file.peek() != EOF);
 			return result;
 		};
 	else if constexpr (std::invocable<TR, std::string &>)

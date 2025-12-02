@@ -1,0 +1,25 @@
+{
+ "version": 2,
+ "configurePresets": [
+	{
+	 "name": "vcpkg",
+	 "generator": "Ninja Multi-Config",
+	 "binaryDir": "${sourceDir}/build",
+	 "cacheVariables": {
+		"CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+	 }
+	}
+ ],
+ "buildPresets": [
+	{
+	 "name": "Debug",
+	 "configuration": "Debug",
+	 "configurePreset": "vcpkg"
+	},
+	{
+	 "name": "RelWithDebInfo",
+	 "configuration": "RelWithDebInfo",
+	 "configurePreset": "vcpkg"
+	}
+ ]
+}
