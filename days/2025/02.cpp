@@ -1,5 +1,8 @@
+#include <atomic>
 #include <cmath>
+#include <thread_pool/thread_pool.h>
 #include "shared.h"
+
 
 bool is_double(uint64_t x) {
 	int length = intwidth(x);
@@ -60,19 +63,33 @@ int main() {
 			return result;
 		},
 		[](const std::vector<std::pair<uint64_t, uint64_t>> &s) {
-			uint64_t invalid = 0;
-			for (auto &[start, end] : s)
-				for (uint64_t x = start; x <= end; x++)
-					if (is_double(x))
-						invalid += x;
-			return invalid;
+			std::atomic_uint64_t invalid = 0;
+			dp::thread_pool pool{};
+			for (auto [start, end] : s) {
+				pool.enqueue_detach([=, &invalid] {
+					uint64_t total = 0;
+					for (uint64_t x = start; x <= end; x++)
+						if (is_double(x))
+							total += x;
+					invalid.fetch_add(total);
+				});
+			}
+			pool.wait_for_tasks();
+			return invalid.load();
 		},
 		[](const std::vector<std::pair<uint64_t, uint64_t>> &s) {
-			uint64_t invalid = 0;
-			for (auto &[start, end] : s)
-				for (uint64_t x = start; x <= end; x++)
-					if (is_double_or_more(x))
-						invalid += x;
-			return invalid;
+			std::atomic_uint64_t invalid = 0;
+			dp::thread_pool pool{};
+			for (auto [start, end] : s) {
+				pool.enqueue_detach([=, &invalid] {
+					uint64_t total = 0;
+					for (uint64_t x = start; x <= end; x++)
+						if (is_double_or_more(x))
+							total += x;
+					invalid.fetch_add(total);
+				});
+			}
+			pool.wait_for_tasks();
+			return invalid.load();
 		});
 }
