@@ -35,6 +35,26 @@ template <class TR> auto split_by(char delim = '\n', TR transform = just_a_strin
 			while (check(file, delim) && file.peek() != EOF);
 			return result;
 		};
+	else if constexpr (std::invocable<TR, std::string_view>)
+		return [=]<class RF>(RF &x) {
+			using R = std::invoke_result_t<TR, std::string_view>;
+			using T = std::remove_cvref_t<RF>;
+			if constexpr (std::is_same_v<T, std::string_view>) {
+				std::vector<R> lines;
+				while (x.size() > 0) {
+					size_t newline = x.find('\n');
+					if (newline == std::string_view::npos) {
+						lines.push_back(transform(x)); // last line
+						break;
+					} else {
+						lines.push_back(transform(x.substr(0, newline)));
+						x = x.substr(newline + 1);
+					}
+				}
+				return lines;
+			} else
+				static_assert(fals<T>, "split_by requires a string or istream or string_view, got a T");
+		};
 	else if constexpr (std::invocable<TR, std::string &>)
 		return [=]<class RF>(RF &x) {
 			using R = std::invoke_result_t<TR, std::string &>;
@@ -51,12 +71,12 @@ template <class TR> auto split_by(char delim = '\n', TR transform = just_a_strin
 				while (std::getline(stream, line, delim)) lines.push_back(transform(line));
 				return lines;
 			} else
-				static_assert(fals<T>, "split_by requires a string or istream, got a T");
+				static_assert(fals<T>, "split_by requires a string or istream or string_view, got a T");
 		};
 	else
 		static_assert(fals<TR>,
 									"split_by requires a transform that takes a string "
-									"or istream, got a TR");
+									"or istream or string_view->string_view, got a TR");
 }
 
 inline auto split_by(const char delim = '\n') { return split_by(delim, just_a_string); }
