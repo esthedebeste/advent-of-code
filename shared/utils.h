@@ -378,3 +378,33 @@ int intwidth(uint64_t x) {
 	else
 		return 1;
 }
+
+
+struct union_find {
+	std::vector<size_t> parent;
+	std::vector<size_t> rank;
+
+	union_find(size_t n) {
+		parent.reserve(n);
+		for (size_t i = 0; i < n; i++) parent.push_back(i);
+		rank = std::vector<size_t>(n, 0);
+	}
+
+	// returns true iff i and j had different parents
+	bool merge(size_t i, size_t j) {
+		size_t x = find(i), y = find(j);
+		if (x == y)
+			return false;
+		size_t rx = rank[x], ry = rank[y];
+		if (rx < ry) {
+			parent[x] = y;
+		} else {
+			parent[y] = x;
+			if (rx == ry)
+				rank[x]++;
+		}
+		return true;
+	}
+
+	size_t find(size_t x) { return parent[x] == x ? x : (parent[x] = find(parent[x])); }
+};
