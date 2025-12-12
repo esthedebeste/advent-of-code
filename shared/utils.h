@@ -114,6 +114,19 @@ inline bool check(std::string_view &in, const char character) {
 	return result;
 }
 
+/// use as you would `check`, but this asserts that it must match
+template <class I, class C> inline void assert_check(I &in, C c) {
+	bool passed = check(in, c);
+	assert(passed);
+}
+
+/// usage: check(input, "Index: ");
+/// skip a string and assert that it does match
+template <class I, size_t Len> inline void assert_check(I &in, const char (&s)[Len]) {
+	bool passed = check(in, s);
+	assert(passed);
+}
+
 struct skip_until {
 	char c;
 
@@ -262,7 +275,7 @@ int dijkstra(
 		queue.pop();
 
 		if (is_goal(current)) {
-			return cost_so_far[current];
+			return cost_so_far.at(current);
 		}
 
 		for (T next : neighbours(current)) {
@@ -408,3 +421,4 @@ struct union_find {
 
 	size_t find(size_t x) { return parent[x] == x ? x : (parent[x] = find(parent[x])); }
 };
+
