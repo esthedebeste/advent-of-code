@@ -1,8 +1,10 @@
+#include <glpk.h>
 #include <valarray>
 #include "shared.h"
 
 using State = uint16_t;
-using Joltage = std::array<int16_t, 10>;
+using Joltage = std::vector<int16_t>;
+
 struct Machine {
 	State target;
 	std::vector<State> buttons;
@@ -37,12 +39,11 @@ static Input input(std::string_view input) {
 			result.buttons.push_back(button);
 		}
 		assert_check(machine, '{');
-		i = 0;
 		do {
 			int16_t x;
 			auto [ptr, ec] = std::from_chars(machine.data(), machine.data() + machine.size(), x);
 			assert(ec == std::errc{});
-			result.joltage[i++] = x;
+			result.joltage.push_back(x);
 			machine = std::string_view{ptr, machine.data() + machine.size()}; // advance beyond this number
 		} while (check(machine, ','));
 		assert_check(machine, '}');
@@ -63,14 +64,44 @@ static int part_1(const Input &machines) {
 	return total;
 }
 
-static std::string_view part_2(const Input &machines) {
+static int64_t part_2(const Input &machines) {
 	int64_t total = 0;
 	for (auto &machine : machines) {
-		// system of linear equations with all sorts of weird shapes
-		// aargh
-		total += 0;
+		const int rows = machine.joltage.size();
+		const int columns = machine.buttons.size();
+		glp_prob *problem = glp_create_prob();
+		glp_set_obj_dir(problem, GLP_MIN);
+		glp_add_rows(problem, rows);
+		for (int row = 0; row < rows; ++row) {
+			glp_set_row_bnds(problem, row + 1, GLP_FX, machine.joltage[row], machine.joltage[row]);
+		}
+		glp_add_cols(problem, columns);
+		for (int column = 0; column < columns; ++column) {
+			glp_set_col_bnds(problem, column + 1, GLP_LO, 0, 0);
+			glp_set_col_kind(problem, column + 1, GLP_IV);
+			glp_set_obj_coef(problem, column + 1, 1);
+		}
+		std::vector<int> ia{}, ja{};
+		std::vector<double> ar{};
+		ia.reserve(rows * columns), ja.reserve(rows * columns), ar.reserve(rows * columns);
+		for (int row = 0; row < rows; ++row) {
+			for (int column = 0; column < columns; ++column) {
+				ia.push_back(row + 1);
+				ja.push_back(column + 1);
+				ar.push_back((machine.buttons[column] >> row) & 1);
+			}
+		}
+		glp_load_matrix(problem, rows * columns, ia.data() - 1, ja.data() - 1, ar.data() - 1);
+		glp_iocp iocp;
+		glp_init_iocp(&iocp);
+		iocp.presolve = GLP_ON;
+		iocp.msg_lev = GLP_MSG_ERR;
+		glp_intopt(problem, &iocp);
+		for (int column = 0; column < columns; ++column)
+			total += std::round(glp_mip_col_val(problem, column + 1));
+		glp_delete_prob(problem);
 	}
-	return "N/A";
+	return total;
 }
 
 #include "main.h"
