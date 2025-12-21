@@ -1,8 +1,8 @@
 #pragma once
+#include <concepts>
 #include <sstream>
 #include <string>
 #include <type_traits>
-#include <concepts>
 #include <vector>
 #include "utils.h"
 
@@ -103,9 +103,18 @@ auto pair_transform(const char delim, InputTransform auto transform) {
 	};
 }
 
-template <class T = int> auto parse_num(std::string_view str, int base = 10) {
+template <class T = int> T parse_num(std::string_view str, int base = 10) {
 	T number;
 	std::from_chars(str.data(), str.data() + str.size(), number, base);
+	return number;
+}
+
+
+template <class T = int> T parse_num_from(std::string_view &str, int base = 10) {
+	T number;
+	auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), number);
+	assert(ec == std::errc{});
+	str = std::string_view{ptr, str.data() + str.size()}; // advance beyond this number
 	return number;
 }
 

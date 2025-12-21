@@ -120,10 +120,17 @@ template <class I, class C> inline void assert_check(I &in, C c) {
 	assert(passed);
 }
 
-/// usage: check(input, "Index: ");
+/// usage: assert_check(input, "Index: ");
 /// skip a string and assert that it does match
 template <class I, size_t Len> inline void assert_check(I &in, const char (&s)[Len]) {
 	bool passed = check(in, s);
+	assert(passed);
+}
+
+/// usage: assert_check(input, isdigit);
+/// skip a character and assert that it does match
+template <class I> inline void assert_check(I &in, CheckMatcher auto matcher) {
+	bool passed = check(in, matcher);
 	assert(passed);
 }
 
@@ -421,4 +428,3 @@ struct union_find {
 
 	size_t find(size_t x) { return parent[x] == x ? x : (parent[x] = find(parent[x])); }
 };
-
